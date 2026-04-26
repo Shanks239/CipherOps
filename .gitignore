@@ -1,0 +1,9 @@
+node_modules/
+artifacts/
+cache/
+dist/
+.env
+*.env
+fhevmTemp/
+ConfidentialPayroll_clean.sol
+standard-input.json
