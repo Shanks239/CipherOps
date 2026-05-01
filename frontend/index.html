@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royalty Layer</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;background:#0a0a0a;color:#e8e8e8;min-height:100vh}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:14px 20px;background:#111;border-bottom:1px solid #1e1e1e;position:sticky;top:0;z-index:100}
+.topbar-logo{font-size:16px;font-weight:700;letter-spacing:-0.3px;color:#fff}
+.topbar-logo span{color:#a78bfa}
+#connect-btn{background:#7c3aed;color:#fff;border:none;padding:9px 18px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer;min-height:40px;transition:background 0.15s}
+#connect-btn:hover{background:#6d28d9}
+.hero{padding:40px 20px 32px;max-width:640px;margin:0 auto}
+.hero h2{font-size:26px;font-weight:700;line-height:1.25;margin-bottom:12px;letter-spacing:-0.5px}
+.hero h2 span{color:#a78bfa}
+.hero p{font-size:15px;color:#888;line-height:1.7;margin-bottom:20px}
+.pill-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px}
+.pill{font-size:12px;padding:4px 10px;border-radius:20px;background:#1a1a1a;border:1px solid #2a2a2a;color:#aaa}
+.pill.green{border-color:#166534;color:#4ade80;background:#052e16}
+.section-label{font-size:11px;font-weight:600;letter-spacing:0.8px;text-transform:uppercase;color:#555;padding:0 20px;margin-bottom:10px;max-width:640px;margin-left:auto;margin-right:auto}
+.steps{max-width:640px;margin:0 auto;padding:0 20px 60px}
+.step-card{background:#111;border:1px solid #1e1e1e;border-radius:14px;padding:18px;margin-bottom:12px;opacity:0.35;pointer-events:none;transition:opacity 0.25s,border-color 0.25s}
+.step-card.unlocked{opacity:1;pointer-events:all}
+.step-card.done{border-color:#166534}
+.step-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+.step-meta{flex:1}
+.step-title{font-size:15px;font-weight:600;margin-bottom:2px}
+.step-role{font-size:11px;color:#555;font-weight:500}
+.badge{font-size:11px;padding:3px 9px;border-radius:20px;background:#1e1e1e;color:#555;white-space:nowrap;margin-left:10px;margin-top:2px}
+.badge.pending{background:#451a03;color:#fb923c}
+.badge.done{background:#052e16;color:#4ade80}
+.badge.error{background:#450a0a;color:#f87171}
+.step-desc{font-size:13px;color:#555;line-height:1.6;margin-bottom:14px;border-left:2px solid #1e1e1e;padding-left:10px}
+.step-desc b{color:#888}
+input{width:100%;background:#0a0a0a;border:1px solid #222;color:#e8e8e8;padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:10px}
+input:focus{outline:none;border-color:#7c3aed}
+input::placeholder{color:#444}
+.row{display:flex;gap:8px;margin-bottom:10px}
+.row input{margin-bottom:0}
+button.action{width:100%;background:#7c3aed;color:#fff;border:none;padding:13px;border-radius:9px;font-size:15px;font-weight:600;cursor:pointer;min-height:48px;margin-top:2px;transition:background 0.15s}
+button.action:hover{background:#6d28d9}
+button.action:disabled{background:#1a1a1a;color:#444;cursor:not-allowed}
+.status-line{font-size:12px;color:#666;margin-top:10px;word-break:break-all;line-height:1.7}
+.status-line a{color:#818cf8;text-decoration:none}
+.status-line a:hover{text-decoration:underline}
+.handle{font-family:monospace;font-size:11px;color:#555;background:#0a0a0a;padding:3px 7px;border-radius:4px;border:1px solid #1e1e1e}
+.reveal-box{text-align:center;padding:20px 0 10px}
+.reveal-value{font-size:42px;font-weight:800;color:#4ade80;letter-spacing:-1px}
+.reveal-currency{font-size:14px;color:#555;margin-top:4px}
+.reveal-note{font-size:12px;color:#444;margin-top:8px;font-style:italic}
+.kms-timer{text-align:center;color:#fb923c;font-size:13px;margin-top:10px;font-weight:500}
+.divider{height:1px;background:#1a1a1a;margin:14px 0}
+.network-badge{display:inline-flex;align-items:center;gap:5px;font-size:12px;color:#888;background:#1a1a1a;padding:4px 10px;border-radius:20px;border:1px solid #2a2a2a}
+.dot{width:6px;height:6px;border-radius:50%;background:#555;display:inline-block}
+.dot.green{background:#4ade80}
+.err-banner{position:fixed;top:0;left:0;right:0;background:#7f1d1d;color:#fca5a5;padding:10px 16px;font-size:13px;z-index:999;display:none}
+</style>
+</head>
+<body>
+
+<div class="err-banner" id="err-banner"></div>
+
+<div class="topbar">
+  <div class="topbar-logo">Royalty<span>Layer</span></div>
+  <button id="connect-btn" onclick="window.connectWallet()" disabled style="opacity:0.5">Loading…</button>
+</div>
+
+<div class="hero">
+  <h2>Private royalty splits,<br><span>enforced on-chain</span></h2>
+  <p>
+    Rights-holders register encrypted percentage splits that stay hidden from
+    each other, the platform, and the operator. The contract enforces that splits
+    sum to 100% — without ever seeing the individual values. Revenue is distributed
+    proportionally on encrypted weights. Only you can decrypt your share.
+  </p>
+  <div class="pill-row">
+    <span class="pill green">✓ Splits never revealed on-chain</span>
+    <span class="pill green">✓ Sum enforced by KMS</span>
+    <span class="pill green">✓ Pull-based claims</span>
+    <span class="pill">Sepolia testnet</span>
+    <span class="pill">Powered by Zama FHEVM</span>
+  </div>
+</div>
+
+<div style="max-width:640px;margin:0 auto 20px;padding:0 20px">
+  <div style="display:flex;gap:8px;background:#111;border:1px solid #1e1e1e;border-radius:10px;padding:4px">
+    <button id="tab-demo" onclick="window.switchTab('demo')"
+      style="flex:1;padding:10px;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;background:#7c3aed;color:#fff;transition:all 0.15s">
+      Demo Flow
+    </button>
+    <button id="tab-dash" onclick="window.switchTab('dash')"
+      style="flex:1;padding:10px;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;background:transparent;color:#555;transition:all 0.15s">
+      Dashboard
+    </button>
+  </div>
+</div>
+
+<div id="dashboard" style="display:none;max-width:640px;margin:0 auto;padding:0 20px 60px">
+  <div style="background:#111;border:1px solid #1e1e1e;border-radius:14px;padding:18px;margin-bottom:12px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:4px">My Assets</div>
+    <div style="font-size:12px;color:#555;margin-bottom:14px">Assets where you are a stakeholder or registrant</div>
+    <div id="dash-assets">
+      <div style="color:#555;font-size:13px;text-align:center;padding:20px">
+        Connect wallet to load your assets
+      </div>
+    </div>
+  </div>
+  <div style="background:#111;border:1px solid #1e1e1e;border-radius:14px;padding:18px">
+    <div style="font-size:15px;font-weight:600;margin-bottom:4px">Observed Assets</div>
+    <div style="font-size:12px;color:#555;margin-bottom:14px">Assets you have observer access to</div>
+    <div id="dash-observed">
+      <div style="color:#555;font-size:13px;text-align:center;padding:20px">
+        Connect wallet to load observed assets
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="demo-flow">
+<div class="section-label">Registration</div>
+<div class="steps">
+
+<div class="step-card" id="step1">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-title">1 · Register Asset Splits</div>
+      <div class="step-role">Actor: Rights Holder / Deal Registrant</div>
+    </div>
+    <span class="badge" id="badge1">idle</span>
+  </div>
+  <div class="step-desc">
+    Each rights-holder's percentage (in basis points) is <b>encrypted locally</b> before
+    being sent on-chain. The contract never sees individual splits — only encrypted handles.
+    BPS must sum to 10,000 (= 100%). Max 8 stakeholders.
+  </div>
+  <div class="row" style="align-items:center;margin-bottom:10px">
+    <input id="asset-name" placeholder="Asset ID (e.g. track-001)" value="track-001" style="flex:2;margin-bottom:0">
+    <select id="stakeholder-count" onchange="window.updateStakeholderRows()"
+      style="flex:1;background:#0a0a0a;border:1px solid #222;color:#e8e8e8;padding:10px 8px;border-radius:8px;font-size:14px;min-height:42px">
+      <option value="2">2 holders</option>
+      <option value="3">3 holders</option>
+      <option value="4">4 holders</option>
+      <option value="5">5 holders</option>
+      <option value="6">6 holders</option>
+      <option value="7">7 holders</option>
+      <option value="8">8 holders</option>
+    </select>
+  </div>
+  <div id="stakeholder-rows"></div>
+  <div id="bps-remaining" style="font-size:12px;color:#555;margin-bottom:8px;text-align:right">
+    Remaining: <span id="bps-left">10000</span> bps
+  </div>
+  <button class="action" onclick="window.registerAsset()">Encrypt &amp; Register Splits</button>
+  <div class="status-line" id="status1"></div>
+</div>
+
+<div class="step-card" id="step2">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-title">2 · Validate Split Integrity</div>
+      <div class="step-role">Actor: Anyone (permissionless)</div>
+    </div>
+    <span class="badge" id="badge2">idle</span>
+  </div>
+  <div class="step-desc">
+    The <b>KMS (Key Management Service)</b> decrypts only the encrypted sum and returns
+    a cryptographic proof. The contract checks the proof on-chain: if sum = 10,000,
+    the asset activates. Individual splits are never revealed — not even to the KMS.
+  </div>
+  <button class="action" onclick="window.validateSplits()">Validate &amp; Activate</button>
+  <div class="kms-timer" id="kms-timer"></div>
+  <div class="status-line" id="status2"></div>
+</div>
+
+</div>
+
+<div class="section-label">Revenue &amp; Distribution</div>
+<div class="steps">
+
+<div class="step-card" id="step3">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-title">3 · Deposit Revenue</div>
+      <div class="step-role">Actor: Distributor / Platform</div>
+    </div>
+    <span class="badge" id="badge3">idle</span>
+  </div>
+  <div class="step-desc">
+    A distributor (streaming platform, sync licensor, label) deposits revenue
+    against the asset. The amount is <b>encrypted before submission</b> — total
+    revenue accumulates as an encrypted on-chain value. No party can read the
+    running total without authorization.
+  </div>
+  <input id="deposit-amount" placeholder="Revenue amount (e.g. 1000000)" value="1000000">
+  <button class="action" onclick="window.depositRevenue()">Deposit Revenue</button>
+  <div class="status-line" id="status3"></div>
+</div>
+
+<div class="step-card" id="step4">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-title">4 · Claim Your Share</div>
+      <div class="step-role">Actor: Rights Holder</div>
+    </div>
+    <span class="badge" id="badge4">idle</span>
+  </div>
+  <div class="step-desc">
+    Each rights-holder claims independently, at any time. The contract computes
+    <b>your entitlement = total revenue × your encrypted split ÷ 10,000</b> —
+    entirely in FHE, without decrypting either operand. Tokens are transferred
+    as encrypted amounts. No other party sees what you received.
+  </div>
+  <button class="action" onclick="window.claimShare()">Claim My Share</button>
+  <div class="status-line" id="status4"></div>
+</div>
+
+</div>
+
+<div class="section-label">Verification</div>
+<div class="steps">
+
+<div class="step-card" id="step5">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-title">5 · Decrypt Your Claimed Amount</div>
+      <div class="step-role">Actor: Rights Holder (private)</div>
+    </div>
+    <span class="badge" id="badge5">idle</span>
+  </div>
+  <div class="step-desc">
+    Sign once with your wallet to authorize a <b>user-scoped decryption</b>.
+    The KMS returns your plaintext amount directly to your browser — it never
+    appears on-chain. Other rights-holders and the platform see nothing.
+  </div>
+  <button class="action" onclick="window.decryptClaimed()">Reveal My Amount</button>
+  <div id="reveal-box" style="display:none" class="reveal-box">
+    <div class="reveal-value" id="reveal-value"></div>
+    <div class="reveal-currency">tokens received</div>
+    <div class="reveal-note">Your split percentage remains encrypted on-chain</div>
+  </div>
+  <div class="status-line" id="status5"></div>
+</div>
+
+<div class="step-card" id="step6">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-title">6 · Grant Observer Access</div>
+      <div class="step-role">Actor: Rights Holder → Compliance Observer</div>
+    </div>
+    <span class="badge" id="badge6">idle</span>
+  </div>
+  <div class="step-desc">
+    A rights-holder can voluntarily grant a <b>compliance observer</b> (manager,
+    auditor, label) read access to their encrypted split and claimed total.
+    The grant is permanent in v1 — it cannot be revoked without redeploying
+    the contract. Grant only to trusted parties.
+  </div>
+  <input id="observer-addr" placeholder="Observer wallet address">
+  <button class="action" onclick="window.grantObserver()">Grant Observer Access</button>
+  <div class="status-line" id="status6"></div>
+</div>
+
+</div>
+
+<script type="module">
+// ── Bootstrap — catch any load failure visibly
+function showErr(msg) {
+  const b = document.getElementById("err-banner");
+  b.textContent = msg;
+  b.style.display = "block";
+}
+
+let ethers, createInstance, SepoliaConfig;
+
+try {
+  const m = await import('./ethers-bundle.js');
+  ethers = m.ethers ?? m;
+  if (!ethers.BrowserProvider) {
+    // try default export shape
+    const keys = Object.keys(m);
+    const ns = m[keys[0]];
+    if (ns && ns.BrowserProvider) ethers = ns;
+  }
+} catch(e) { showErr("ethers failed to load: " + e.message); }
+
+try {
+  const m = await import('./sdk-bundle.js');
+  createInstance = m.createInstance;
+  SepoliaConfig = m.SepoliaConfig;
+  if (m.initSDK) await m.initSDK();
+} catch(e) { showErr("SDK failed to load: " + e.message); }
+
+// ── Config
+const CR_ADDR    = "0x57FefEBE5598A6FbB8aaeA5909c0A703Fe09299F";
+const TOKEN_ADDR = "0x742626Ff76cAcf2426a9B300cE25efEe1981217e";
+const RPC        = "https://ethereum-sepolia-rpc.publicnode.com";
+const SCAN       = "https://sepolia.etherscan.io/tx/";
+
+const CR_ABI = [
+  "function registerAsset(bytes32,address[],bytes32[],bytes) external",
+  "function markSumDecryptable(bytes32) external",
+  "function confirmValidation(bytes32,uint16,bytes) external",
+  "function depositRevenue(bytes32,bytes32,bytes) external",
+  "function claimShare(bytes32) external",
+  "function grantObserver(bytes32,address) external",
+  "function getAssetState(bytes32) view returns (uint8)",
+  "function getEncSum(bytes32) view returns (uint256)",
+  "function getEncClaimed(bytes32,address) view returns (uint256)",
+  "function getStakedAssets(address) view returns (bytes32[])",
+  "function getStakeholders(bytes32) view returns (address[],uint8)",
+  "function getEncShare(bytes32,address) view returns (uint256)",
+  "event ObserverGranted(bytes32 indexed assetId, address indexed stakeholder, address indexed observer)",
+];
+const TOKEN_ABI = ["function mintPlaintext(address,uint128) external"];
+
+// ── State
+let provider, signer, instance, cr, token, assetId;
+
+// ── Helpers
+const shortAddr = a => a.slice(0,6)+"…"+a.slice(-4);
+const toHex32   = v => "0x"+BigInt(v).toString(16).padStart(64,"0");
+const txLink    = h => `<a href="${SCAN}${h}" target="_blank">${h.slice(0,10)}…${h.slice(-6)}</a>`;
+const setStatus = (n,h) => document.getElementById("status"+n).innerHTML = h;
+const setBadge  = (n,c,t) => { const b=document.getElementById("badge"+n); b.className="badge "+c; b.textContent=t; };
+const unlock    = n => document.getElementById("step"+n).classList.add("unlocked");
+const markDone  = n => document.getElementById("step"+n).classList.add("done");
+const disableBtn= n => { const b=document.querySelector(`#step${n} button.action`); if(b) b.disabled=true; };
+const enableBtn = n => { const b=document.querySelector(`#step${n} button.action`); if(b) b.disabled=false; };
+const STATES    = ["UNREGISTERED","PENDING","ACTIVE","INVALID"];
+
+// ── Connect
+window.connectWallet = async function() {
+  try {
+    const walletProvider = getProvider();
+    if (!walletProvider) {
+      alert("No wallet detected.\n\nOn mobile: open in MetaMask or Rabby browser.\nOn desktop: install MetaMask, Rabby, or another EIP-1193 wallet extension.");
+      return;
+    }
+    provider = new ethers.BrowserProvider(walletProvider);
+    await provider.send("eth_requestAccounts", []);
+    signer = await provider.getSigner();
+    const addr = await signer.getAddress();
+    const net = await provider.getNetwork();
+
+    if (Number(net.chainId) !== 11155111) {
+      try {
+        await walletProvider.request({ method:"wallet_switchEthereumChain", params:[{chainId:"0xaa36a7"}] });
+      } catch(sw) {
+        if (sw.code === 4902 || sw.code === -32603) {
+          await walletProvider.request({ method:"wallet_addEthereumChain", params:[{
+            chainId:"0xaa36a7", chainName:"Sepolia testnet",
+            nativeCurrency:{name:"Ether",symbol:"ETH",decimals:18},
+            rpcUrls:["https://ethereum-sepolia-rpc.publicnode.com"],
+            blockExplorerUrls:["https://sepolia.etherscan.io"]
+          }]});
+        } else { alert("Could not switch to Sepolia: " + sw.message); return; }
+      }
+      signer = await provider.getSigner();
+    }
+
+    // Re-get signer after possible network switch
+    signer = await provider.getSigner();
+    cr    = new ethers.Contract(CR_ADDR, CR_ABI, signer);
+    token = new ethers.Contract(TOKEN_ADDR, TOKEN_ABI, signer);
+    instance = await createInstance({ ...SepoliaConfig, network: RPC });
+
+    // Re-init on network or account change
+    walletProvider.on?.("chainChanged", () => window.disconnectWallet());
+    walletProvider.on?.("accountsChanged", (accs) => { if (!accs.length) window.disconnectWallet(); });
+
+    const btn = document.getElementById("connect-btn");
+    btn.textContent = shortAddr(addr) + " ✕";
+    btn.style.background = "#16a34a";
+    btn.onclick = window.disconnectWallet;
+
+    document.getElementById("addr1").value = addr;
+    unlock(1);
+    setStatus(1, `<span style="color:#4ade80">● Connected · Sepolia · ${addr.slice(0,8)}…</span>`);
+  } catch(e) {
+    alert("Connection failed: " + (e.shortMessage ?? e.message));
+  }
+};
+
+window.disconnectWallet = function() {
+  provider=null; signer=null; instance=null; cr=null; token=null; assetId=null;
+  const btn = document.getElementById("connect-btn");
+  btn.textContent = "Connect Wallet";
+  btn.style.background = "#7c3aed";
+  btn.onclick = window.connectWallet;
+  for(let i=1;i<=6;i++){
+    document.getElementById("step"+i).classList.remove("unlocked","done");
+    setBadge(i,"","idle");
+    setStatus(i,"");
+    enableBtn(i);
+    if(i===5) document.getElementById("reveal-box").style.display="none";
+  }
+  // just clear — user picks a fresh name
+  document.getElementById("asset-name").value = "";
+  if (window.updateStakeholderRows) window.updateStakeholderRows();
+};
+
+// ── Wallet detection (EIP-6963 + legacy fallback)
+const walletProviders = [];
+
+// EIP-6963: modern multi-wallet standard
+window.addEventListener("eip6963:announceProvider", (event) => {
+  walletProviders.push(event.detail);
+});
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+
+// Signal module ready — enable connect button
+await new Promise(r => setTimeout(r, 200)); // let EIP-6963 wallets announce
+const btn = document.getElementById("connect-btn");
+btn.disabled = false;
+btn.style.opacity = "1";
+btn.textContent = "Connect Wallet";
+// Build initial stakeholder rows
+if (window.updateStakeholderRows) window.updateStakeholderRows();
+setTimeout(() => { if (window.updateStakeholderRows) window.updateStakeholderRows(); }, 100);
+
+function getProvider() {
+  // EIP-6963 wallets found
+  if (walletProviders.length === 1) return walletProviders[0].provider;
+  if (walletProviders.length > 1) {
+    // Show picker — prefer MetaMask or Rabby if present
+    const preferred = walletProviders.find(w =>
+      w.info.name.toLowerCase().includes("metamask") ||
+      w.info.name.toLowerCase().includes("rabby")
+    );
+    if (preferred) return preferred.provider;
+    return walletProviders[0].provider; // first available
+  }
+  // Legacy fallback
+  if (window.ethereum) return window.ethereum;
+  return null;
+}
+
+// ── Step 1 helpers
+window.updateStakeholderRows = function() {
+  const n = parseInt(document.getElementById("stakeholder-count").value);
+  const container = document.getElementById("stakeholder-rows");
+  container.innerHTML = "";
+  for (let i = 1; i <= n; i++) {
+    const row = document.createElement("div");
+    row.className = "row";
+    row.style.marginBottom = "10px";
+    row.innerHTML = `
+      <input id="addr${i}" placeholder="Rights-holder ${i} address" style="flex:2"
+        oninput="window.updateBpsLeft()">
+      <input id="bps${i}" placeholder="BPS" value="${i===1?Math.floor(10000/n)+(10000%n):Math.floor(10000/n)}"
+        style="flex:1" type="number" min="1" max="9999"
+        oninput="window.updateBpsLeft()">
+    `;
+    container.appendChild(row);
+  }
+  // Pre-fill addr1 with connected wallet if available
+  const a1 = document.getElementById("addr1");
+  if (a1 && signer) signer.getAddress().then(a => { if(!a1.value) a1.value = a; });
+  window.updateBpsLeft();
+};
+
+window.updateBpsLeft = function() {
+  const n = parseInt(document.getElementById("stakeholder-count").value);
+  let total = 0;
+  for (let i = 1; i <= n; i++) {
+    const v = parseInt(document.getElementById("bps"+i)?.value || 0);
+    if (!isNaN(v)) total += v;
+  }
+  const left = 10000 - total;
+  const el = document.getElementById("bps-left");
+  if (el) {
+    el.textContent = left;
+    el.style.color = left === 0 ? "#4ade80" : left < 0 ? "#f87171" : "#fb923c";
+  }
+};
+
+window.registerAsset = async function() {
+  const n = parseInt(document.getElementById("stakeholder-count").value);
+  const name = document.getElementById("asset-name").value.trim();
+
+  // Check if name already used — suggest a fix
+  if (!name) { setStatus(1,"❌ Enter an asset name."); return; }
+
+  // Collect stakeholders
+  const addrs = [], bpsList = [];
+  for (let i = 1; i <= n; i++) {
+    const a = document.getElementById("addr"+i)?.value.trim();
+    const b = parseInt(document.getElementById("bps"+i)?.value);
+    if (!a) { setStatus(1,`❌ Fill address for holder ${i}.`); return; }
+    if (isNaN(b) || b <= 0) { setStatus(1,`❌ Invalid BPS for holder ${i}.`); return; }
+    addrs.push(a); bpsList.push(b);
+  }
+  const bpsSum = bpsList.reduce((a,b)=>a+b,0);
+  if (bpsSum !== 10000) {
+    setStatus(1,`❌ BPS must sum to 10,000. Current sum: ${bpsSum}. Difference: ${10000-bpsSum}`);
+    setBadge(1,"error","invalid"); return;
+  }
+
+  disableBtn(1); setBadge(1,"pending","encrypting…");
+  setStatus(1,"⏳ Encrypting splits locally — takes a few seconds…");
+  await new Promise(r=>setTimeout(r,60));
+
+  try {
+    const candidate = ethers.keccak256(ethers.toUtf8Bytes(name));
+    // Check if already registered
+    const existingState = await cr.getAssetState(candidate);
+    if (Number(existingState) !== 0) {
+      const ts = Date.now().toString().slice(-4);
+      const suggestion = name + "-" + ts;
+      setStatus(1,
+        `❌ Asset "<b>${name}</b>" already registered (state: ${STATES[Number(existingState)]}).<br>`+
+        `Try a different name — e.g. <b>${suggestion}</b>`);
+      setBadge(1,"error","exists"); enableBtn(1);
+      document.getElementById("asset-name").value = suggestion;
+      return;
+    }
+    assetId = candidate;
+
+    const userAddr = await signer.getAddress();
+    const inp = instance.createEncryptedInput(CR_ADDR, userAddr);
+    for (const b of bpsList) inp.add16(b);
+    const enc = await inp.encrypt();
+
+    setBadge(1,"pending","confirm wallet…");
+    setStatus(1,"⏳ Awaiting wallet confirmation…");
+    const handles = bpsList.map((_,i) => enc.handles[i]);
+    const tx = await cr.registerAsset(assetId, addrs, handles, enc.inputProof);
+    setBadge(1,"pending","mining…");
+    setStatus(1,"⏳ Transaction submitted, waiting for confirmation…");
+    const receipt = await tx.wait();
+    setBadge(1,"done","done"); markDone(1);
+    setStatus(1,
+      `✓ ${n} splits registered · Gas: ${receipt.gasUsed.toLocaleString()}<br>`+
+      `Asset: <span class="handle">${name}</span> · `+txLink(tx.hash)+
+      `<br><span style="color:#555">Splits encrypted on-chain — no one can read individual values</span>`);
+    unlock(2);
+  } catch(e) { setBadge(1,"error","error"); setStatus(1,"❌ "+(e.shortMessage??e.message)); enableBtn(1); }
+};
+
+// ── Step 2: Validate
+window.validateSplits = async function() {
+  disableBtn(2); setBadge(2,"pending","marking…");
+  setStatus(2,"⏳ Step 1/3: marking encrypted sum for decryption…");
+  try {
+    const tx1 = await cr.markSumDecryptable(assetId);
+    await tx1.wait();
+    setStatus(2,"⏳ Step 2/3: KMS decrypting encrypted sum…");
+    setBadge(2,"pending","KMS…");
+    let secs=0;
+    const timer = setInterval(()=>{ secs++; document.getElementById("kms-timer").textContent=`KMS working… ${secs}s`; },1000);
+    const rawHandle = await cr.getEncSum(assetId);
+    const encSumHandle = toHex32(rawHandle);
+    const result = await instance.publicDecrypt([encSumHandle]);
+    clearInterval(timer);
+    const decryptedSum = result.clearValues[encSumHandle];
+    document.getElementById("kms-timer").textContent=`✓ KMS responded in ${secs}s`;
+    setBadge(2,"pending","confirming…");
+    setStatus(2,`⏳ Step 3/3: submitting proof — KMS confirmed sum = <b style="color:#4ade80">${decryptedSum}</b>…`);
+    const tx2 = await cr.confirmValidation(assetId, decryptedSum, result.decryptionProof);
+    await tx2.wait();
+    const state = STATES[Number(await cr.getAssetState(assetId))]??"UNKNOWN";
+    setBadge(2,"done","done"); markDone(2);
+    setStatus(2,
+      `✓ Integrity verified · Sum = ${decryptedSum} bps · State: <b style="color:#4ade80">${state}</b><br>`+
+      txLink(tx2.hash)+
+      `<br><span style="color:#555">Individual splits remain encrypted — only the sum was revealed to the KMS</span>`);
+    unlock(3);
+  } catch(e) { setBadge(2,"error","error"); setStatus(2,"❌ "+(e.shortMessage??e.message)); enableBtn(2); }
+};
+
+// ── Step 3: Deposit
+window.depositRevenue = async function() {
+  disableBtn(3); setBadge(3,"pending","minting…");
+  setStatus(3,"⏳ Minting test tokens to contract…");
+  try {
+    const amount = BigInt(document.getElementById("deposit-amount").value.trim());
+    const userAddr = await signer.getAddress();
+    const mintTx = await token.mintPlaintext(CR_ADDR, amount);
+    await mintTx.wait();
+    setBadge(3,"pending","encrypting…");
+    setStatus(3,"⏳ Encrypting revenue amount…");
+    await new Promise(r=>setTimeout(r,60));
+    const inp = instance.createEncryptedInput(CR_ADDR, userAddr);
+    inp.add128(amount);
+    const enc = await inp.encrypt();
+    setBadge(3,"pending","confirm wallet…");
+    setStatus(3,"⏳ Awaiting wallet confirmation…");
+    const tx = await cr.depositRevenue(assetId, enc.handles[0], enc.inputProof);
+    setBadge(3,"pending","mining…");
+    const receipt = await tx.wait();
+    setBadge(3,"done","done"); markDone(3);
+    setStatus(3,
+      `✓ Revenue deposited · Gas: ${receipt.gasUsed.toLocaleString()}<br>`+txLink(tx.hash)+
+      `<br><span style="color:#555">Revenue amount is encrypted — total accumulates privately on-chain</span>`);
+    unlock(4);
+  } catch(e) { setBadge(3,"error","error"); setStatus(3,"❌ "+(e.shortMessage??e.message)); enableBtn(3); }
+};
+
+// ── Step 4: Claim
+window.claimShare = async function() {
+  disableBtn(4); setBadge(4,"pending","confirm wallet…");
+  setStatus(4,"⏳ Awaiting wallet confirmation…");
+  try {
+    const tx = await cr.claimShare(assetId);
+    setBadge(4,"pending","mining…");
+    setStatus(4,"⏳ Computing encrypted entitlement on-chain…");
+    const receipt = await tx.wait();
+    const userAddr = await signer.getAddress();
+    const rawHandle = await cr.getEncClaimed(assetId, userAddr);
+    setBadge(4,"done","done"); markDone(4);
+    setStatus(4,
+      `✓ Share claimed · Gas: ${receipt.gasUsed.toLocaleString()}<br>`+
+      `Encrypted handle: <span class="handle">${toHex32(rawHandle).slice(0,16)}…</span> · `+txLink(tx.hash)+
+      `<br><span style="color:#555">Amount transferred as encrypted token — not visible on-chain</span>`);
+    unlock(5); unlock(6);
+  } catch(e) { setBadge(4,"error","error"); setStatus(4,"❌ "+(e.shortMessage??e.message)); enableBtn(4); }
+};
+
+// ── Step 5: Decrypt
+window.decryptClaimed = async function() {
+  disableBtn(5); setBadge(5,"pending","sign…");
+  setStatus(5,"⏳ Sign in your wallet to authorize private decryption…");
+  try {
+    const crAddr = CR_ADDR;
+    const userAddr = await signer.getAddress();
+    const rawHandle = await cr.getEncClaimed(assetId, userAddr);
+    const encClaimed = toHex32(rawHandle);
+    const { publicKey, privateKey } = instance.generateKeypair();
+    const startTimestamp = Math.floor(Date.now()/1000);
+    const durationDays = 1;
+    const eip712 = instance.createEIP712(publicKey,[crAddr],startTimestamp,durationDays);
+    const { EIP712Domain:_, ...types } = eip712.types;
+    const sig = await signer.signTypedData(eip712.domain, types, eip712.message);
+    setBadge(5,"pending","decrypting…");
+    setStatus(5,"⏳ KMS decrypting your amount privately…");
+    const result = await instance.userDecrypt(
+      [{handle:encClaimed,contractAddress:crAddr}],
+      privateKey, publicKey, sig,
+      [crAddr], userAddr, startTimestamp, durationDays
+    );
+    const claimed = result[encClaimed];
+    document.getElementById("reveal-value").textContent = Number(claimed).toLocaleString();
+    document.getElementById("reveal-box").style.display = "block";
+    setBadge(5,"done","done"); markDone(5);
+    setStatus(5,"✓ Decryption successful · Only you can see this value");
+  } catch(e) { setBadge(5,"error","error"); setStatus(5,"❌ "+(e.shortMessage??e.message)); enableBtn(5); }
+};
+
+// ── Step 6: Observer
+window.grantObserver = async function() {
+  disableBtn(6); setBadge(6,"pending","confirm wallet…");
+  try {
+    const observer = document.getElementById("observer-addr").value.trim();
+    if (!observer) { setStatus(6,"❌ Enter an observer address."); enableBtn(6); return; }
+    setStatus(6,"⏳ Awaiting wallet confirmation…");
+    const tx = await cr.grantObserver(assetId, observer);
+    setBadge(6,"pending","mining…");
+    const receipt = await tx.wait();
+    setBadge(6,"done","done"); markDone(6);
+    setStatus(6,
+      `✓ Observer access granted · Gas: ${receipt.gasUsed.toLocaleString()}<br>`+txLink(tx.hash)+
+      `<br><span style="color:#f87171">⚠ This grant is permanent in v1. Only grant to trusted parties.</span>`);
+  } catch(e) { setBadge(6,"error","error"); setStatus(6,"❌ "+(e.shortMessage??e.message)); enableBtn(6); }
+};
+
+// ── Tab switching
+window.switchTab = function(tab) {
+  const isDemo = tab === 'demo';
+  document.getElementById('demo-flow').style.display = isDemo ? 'block' : 'none';
+  document.getElementById('dashboard').style.display = isDemo ? 'none' : 'block';
+  const td = document.getElementById('tab-demo');
+  const tdb = document.getElementById('tab-dash');
+  td.style.background = isDemo ? '#7c3aed' : 'transparent';
+  td.style.color = isDemo ? '#fff' : '#555';
+  tdb.style.background = isDemo ? 'transparent' : '#7c3aed';
+  tdb.style.color = isDemo ? '#555' : '#fff';
+  if (!isDemo && signer) window.loadDashboard();
+};
+
+window.loadDashboard = async function() {
+  if (!signer || !cr) return;
+  const userAddr = await signer.getAddress();
+  const dashAssets = document.getElementById('dash-assets');
+  dashAssets.innerHTML = '<div style="color:#555;font-size:13px;text-align:center;padding:16px">Loading…</div>';
+  try {
+    const assetIds = await cr.getStakedAssets(userAddr);
+    if (!assetIds.length) {
+      dashAssets.innerHTML = '<div style="color:#555;font-size:13px;text-align:center;padding:16px">No assets yet. Register one in Demo Flow.</div>';
+    } else {
+      dashAssets.innerHTML = '';
+      for (const id of assetIds) {
+        const state = Number(await cr.getAssetState(id));
+        const stateColor = state===2?'#4ade80':state===3?'#f87171':'#fb923c';
+        const stateName = ['UNREGISTERED','PENDING','ACTIVE','INVALID'][state]??'UNKNOWN';
+        const [holders] = await cr.getStakeholders(id);
+        const card = document.createElement('div');
+        card.style='border:1px solid #1e1e1e;border-radius:10px;padding:14px;margin-bottom:10px';
+        card.innerHTML=`
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+            <span style="font-family:monospace;font-size:12px;color:#888">${id.slice(0,16)}…</span>
+            <span style="font-size:11px;padding:2px 8px;border-radius:20px;background:#1e1e1e;color:${stateColor}">${stateName}</span>
+          </div>
+          <div style="font-size:12px;color:#555;margin-bottom:10px">${holders.length} holder${holders.length>1?'s':''}</div>
+          ${state===2?`
+            <div style="display:flex;gap:8px;margin-bottom:8px">
+              <button onclick="window.dashClaim('${id}')" style="flex:1;background:#7c3aed;color:#fff;border:none;padding:9px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;min-height:40px">Claim</button>
+              <button onclick="window.dashDecrypt('${id}')" style="flex:1;background:#1e1e1e;color:#a78bfa;border:1px solid #3730a3;padding:9px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;min-height:40px">Reveal</button>
+            </div>
+            <button onclick="window.dashDeposit('${id}')" style="width:100%;background:#0a0a0a;color:#666;border:1px solid #222;padding:9px;border-radius:7px;font-size:12px;cursor:pointer;min-height:38px">+ Deposit Revenue (Distributor)</button>
+          `:state===1?`
+            <button onclick="window.dashValidate('${id}')" style="width:100%;background:#451a03;color:#fbbf24;border:none;padding:9px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;min-height:40px">Validate Splits</button>
+          `:''}
+          <div id="ds-${id.slice(2,10)}" style="font-size:12px;color:#666;margin-top:6px;word-break:break-all;line-height:1.6"></div>`;
+        dashAssets.appendChild(card);
+      }
+    }
+  } catch(e) { dashAssets.innerHTML=`<div style="color:#f87171;font-size:13px;padding:12px">Error: ${e.shortMessage??e.message}</div>`; }
+
+  const dashObserved = document.getElementById('dash-observed');
+  dashObserved.innerHTML = '<div style="color:#555;font-size:13px;text-align:center;padding:16px">Scanning…</div>';
+  try {
+    const evs = await cr.queryFilter(cr.filters.ObserverGranted(null,null,userAddr),-50000);
+    if (!evs.length) { dashObserved.innerHTML='<div style="color:#555;font-size:13px;text-align:center;padding:16px">No observed assets.</div>'; }
+    else {
+      dashObserved.innerHTML='';
+      const seen=new Set();
+      for (const ev of evs) {
+        const id=ev.args[0], sh=ev.args[1];
+        if(seen.has(id)) continue; seen.add(id);
+        const card=document.createElement('div');
+        card.style='border:1px solid #1e1e1e;border-radius:10px;padding:14px;margin-bottom:10px';
+        card.innerHTML=`
+          <div style="font-family:monospace;font-size:12px;color:#888;margin-bottom:4px">${id.slice(0,16)}…</div>
+          <div style="font-size:12px;color:#555;margin-bottom:10px">Holder: ${sh.slice(0,10)}…</div>
+          <button onclick="window.dashObsDecrypt('${id}','${sh}')" style="width:100%;background:#1e1e1e;color:#a78bfa;border:1px solid #3730a3;padding:9px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;min-height:40px">Decrypt Their Share</button>
+          <div id="os-${id.slice(2,10)}" style="font-size:12px;color:#666;margin-top:6px;word-break:break-all"></div>`;
+        dashObserved.appendChild(card);
+      }
+    }
+  } catch(e) {
+    // If event filter fails, show graceful message not raw error
+    const msg = e.message ?? '';
+    if (msg.includes('not a function') || msg.includes('filter')) {
+      dashObserved.innerHTML = '<div style="color:#555;font-size:13px;text-align:center;padding:16px">No observed assets found.</div>';
+    } else {
+      dashObserved.innerHTML = `<div style="color:#f87171;font-size:13px;padding:12px">Could not load observed assets: ${e.shortMessage??e.message}</div>`;
+    }
+  }
+};
+
+window.dashClaim = async function(id) {
+  const el=document.getElementById('ds-'+id.slice(2,10));
+  if(el) el.textContent='⏳ Claiming…';
+  try {
+    const tx=await cr.claimShare(id); if(el) el.textContent='⏳ Mining…';
+    const r=await tx.wait();
+    if(el) el.innerHTML=`✓ Claimed · Gas: ${r.gasUsed.toLocaleString()} · ${txLink(tx.hash)}`;
+  } catch(e) { if(el) el.textContent='❌ '+(e.shortMessage??e.message); }
+};
+
+window.dashDecrypt = async function(id) {
+  const el=document.getElementById('ds-'+id.slice(2,10));
+  if(el) el.textContent='⏳ Sign in wallet…';
+  try {
+    const userAddr=await signer.getAddress();
+    const raw=await cr.getEncClaimed(id,userAddr);
+    if(BigInt(raw)===0n){if(el)el.textContent='Claim first.';return;}
+    const h=toHex32(raw),{publicKey,privateKey}=instance.generateKeypair();
+    const ts=Math.floor(Date.now()/1000);
+    const eip=instance.createEIP712(publicKey,[CR_ADDR],ts,1);
+    const{EIP712Domain:_,...types}=eip.types;
+    const sig=await signer.signTypedData(eip.domain,types,eip.message);
+    if(el)el.textContent='⏳ Decrypting…';
+    const res=await instance.userDecrypt([{handle:h,contractAddress:CR_ADDR}],privateKey,publicKey,sig,[CR_ADDR],userAddr,ts,1);
+    if(el)el.innerHTML=`<span style="color:#4ade80;font-size:20px;font-weight:700">${Number(res[h]).toLocaleString()}</span> <span style="color:#555">tokens</span>`;
+  } catch(e){if(el)el.textContent='❌ '+(e.shortMessage??e.message);}
+};
+
+window.dashDeposit = async function(id) {
+  const el=document.getElementById('ds-'+id.slice(2,10));
+  const amount=prompt('Revenue amount to deposit:');
+  if(!amount)return;
+  try {
+    const userAddr=await signer.getAddress(),amt=BigInt(amount);
+    if(el)el.textContent='⏳ Minting…';
+    await (await token.mintPlaintext(CR_ADDR,amt)).wait();
+    if(el)el.textContent='⏳ Encrypting…';
+    const inp=instance.createEncryptedInput(CR_ADDR,userAddr);
+    inp.add128(amt);const enc=await inp.encrypt();
+    if(el)el.textContent='⏳ Depositing…';
+    const tx=await cr.depositRevenue(id,enc.handles[0],enc.inputProof);
+    const r=await tx.wait();
+    if(el)el.innerHTML=`✓ Deposited · Gas: ${r.gasUsed.toLocaleString()} · ${txLink(tx.hash)}`;
+  } catch(e){if(el)el.textContent='❌ '+(e.shortMessage??e.message);}
+};
+
+window.dashValidate = async function(id) {
+  const el=document.getElementById('ds-'+id.slice(2,10));
+  if(el)el.textContent='⏳ Marking…';
+  try {
+    await (await cr.markSumDecryptable(id)).wait();
+    if(el)el.textContent='⏳ KMS decrypting…';
+    const raw=await cr.getEncSum(id),h=toHex32(raw);
+    const res=await instance.publicDecrypt([h]);
+    const sum=res.clearValues[h];
+    if(el)el.textContent='⏳ Confirming…';
+    await (await cr.confirmValidation(id,sum,res.decryptionProof)).wait();
+    if(el)el.innerHTML=`✓ Validated · Sum=${sum}`;
+    setTimeout(()=>window.loadDashboard(),1500);
+  } catch(e){if(el)el.textContent='❌ '+(e.shortMessage??e.message);}
+};
+
+window.dashObsDecrypt = async function(id,sh) {
+  const el=document.getElementById('os-'+id.slice(2,10));
+  if(el)el.textContent='⏳ Sign in wallet…';
+  try {
+    const userAddr=await signer.getAddress();
+    const raw=await cr.getEncShare(id,sh);
+    if(!raw||BigInt(raw)===0n){if(el)el.textContent='No share found.';return;}
+    const h=toHex32(raw),{publicKey,privateKey}=instance.generateKeypair();
+    const ts=Math.floor(Date.now()/1000);
+    const eip=instance.createEIP712(publicKey,[CR_ADDR],ts,1);
+    const{EIP712Domain:_,...types}=eip.types;
+    const sig=await signer.signTypedData(eip.domain,types,eip.message);
+    if(el)el.textContent='⏳ Decrypting…';
+    const res=await instance.userDecrypt([{handle:h,contractAddress:CR_ADDR}],privateKey,publicKey,sig,[CR_ADDR],userAddr,ts,1);
+    if(el)el.innerHTML=`<span style="color:#a78bfa;font-size:20px;font-weight:700">${Number(res[h]).toLocaleString()}</span> <span style="color:#555">bps</span>`;
+  } catch(e){if(el)el.textContent='❌ '+(e.shortMessage??e.message);}
+};
+</script>
+</div>
+</body>
+</html>

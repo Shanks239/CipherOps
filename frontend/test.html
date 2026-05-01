@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="background:#111;color:#eee;padding:20px;font-family:monospace">
+<h2>SDK Load Test</h2>
+<div id="out">Loading...</div>
+<script type="module">
+  const out = document.getElementById('out');
+  try {
+    out.textContent = 'Importing SDK bundle...';
+    const sdk = await import('./sdk-bundle.js');
+    out.textContent = 'OK. Keys: ' + Object.keys(sdk).slice(0,8).join(', ');
+  } catch(e) {
+    out.style.color = '#f87171';
+    out.textContent = 'ERROR: ' + e.message;
+  }
+</script>
+</body>
+</html>
