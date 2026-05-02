@@ -8,3 +8,8 @@ fhevmTemp/
 ConfidentialPayroll_clean.sol
 standard-input.json
 .vscode/
+cipherops/artifacts/
+cipherops/cache/
+cipherops/fhevmTemp/
+cipherops/node_modules/
+cipherops/standard-input.json
