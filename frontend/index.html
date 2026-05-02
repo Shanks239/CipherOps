@@ -421,7 +421,7 @@ footer{
 
 <div class="tab-nav">
   <div class="tab-track">
-    <button class="tab-btn active" id="tab-demo" onclick="window.switchTab('demo')">Demo Flow</button>
+    <button class="tab-btn active" id="tab-demo" onclick="window.switchTab('demo')">Protocol</button>
     <button class="tab-btn" id="tab-dash" onclick="window.switchTab('dash')">Dashboard</button>
   </div>
 </div>
@@ -865,7 +865,7 @@ window.claimShare = async function() {
       `Handle: <span class="mono">${toHex32(rawHandle).slice(0,18)}…</span> · ${txLink(tx.hash)}<br>`+
       `<span style="color:var(--text-muted)">Amount transferred as encrypted token</span>`);
     unlock(4);
-  } catch(e) { setBadge(3,'error','error'); document.getElementById('step3').classList.add('error-state'); setStatus(3,'❌ '+(e.shortMessage??e.message)); enableBtn(3); }
+  } catch(e) { setBadge(3,'error','error'); document.getElementById('step3').classList.add('error-state'); const msg3 = (e.shortMessage??e.message??''); setStatus(3,'❌ '+(msg3.includes('no revenue') ? 'No revenue deposited yet. Deposit funds via the Dashboard before claiming.' : msg3)); enableBtn(3); }
 };
 
 // ── Step 4: Decrypt
@@ -941,7 +941,7 @@ window.loadDashboard = async function() {
   try {
     const assetIds = await cr.getStakedAssets(userAddr);
     if (!assetIds.length) {
-      dashAssets.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px">No assets found. Register one in Demo Flow.</div>';
+      dashAssets.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px">No assets found. Register one in Protocol.</div>';
     } else {
       dashAssets.innerHTML = '';
       for (const id of assetIds) {
