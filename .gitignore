@@ -7,3 +7,4 @@ dist/
 fhevmTemp/
 ConfidentialPayroll_clean.sol
 standard-input.json
+.vscode/
