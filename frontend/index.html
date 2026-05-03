@@ -15,13 +15,13 @@
   --border:    #2a2318;
   --border2:   #3a3020;
   --gold:      #c9a55a;
-  --gold-dim:  #b09448;
+  --gold-dim:  #8a6e3a;
   --gold-pale: #f0dba8;
   --teal:      #5b8a82;
   --teal-dim:  #3d6059;
   --text:      #e8dfc8;
-  --text-dim:  #b0a48c;
-  --text-muted:#8c7c65;
+  --text-dim:  #9a8f7a;
+  --text-muted:#5a5040;
   --red:       #c0583a;
   --red-dim:   #7a2e1a;
   --green:     #6a9e72;
@@ -109,29 +109,39 @@ body{
 .pill.gold{border-color:var(--gold-dim);color:var(--gold);background:rgba(201,165,90,0.05)}
 .pill.teal{border-color:var(--teal-dim);color:var(--teal);background:rgba(91,138,130,0.05)}
 
-/* ── Tab nav */
-.tab-nav{
-  max-width:680px;margin:0 auto 32px;padding:0 24px;
+/* ── Section nav */
+.section-nav{
+  position:sticky;top:53px;z-index:90;
+  background:rgba(15,13,11,0.95);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
 }
-.tab-track{
+.section-nav-inner{
+  max-width:680px;margin:0 auto;
+  padding:0 24px;
   display:flex;gap:0;
-  border:1px solid var(--border);
-  border-radius:3px;overflow:hidden;
 }
-.tab-btn{
-  flex:1;padding:10px;border:none;
-  font-family:'IBM Plex Mono',monospace;
-  font-size:11px;font-weight:500;
-  letter-spacing:0.8px;text-transform:uppercase;
-  cursor:pointer;transition:all 0.15s;
-  background:transparent;
+.snav-btn{
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;font-weight:400;
+  letter-spacing:0.3px;
   color:var(--text-muted);
+  background:none;border:none;
+  padding:16px 20px 14px;
+  cursor:pointer;
+  position:relative;
+  transition:color 0.2s;
 }
-.tab-btn.active{
-  background:var(--bg3);
-  color:var(--gold);
+.snav-btn::after{
+  content:'';
+  position:absolute;bottom:0;left:20px;right:20px;
+  height:1px;background:var(--gold);
+  transform:scaleX(0);
+  transition:transform 0.2s;
 }
-.tab-btn:first-child{border-right:1px solid var(--border)}
+.snav-btn.active{color:var(--text)}
+.snav-btn.active::after{transform:scaleX(1)}
+.snav-btn:hover{color:var(--text-dim)}
 
 /* ── Section label */
 .section-label{
@@ -189,7 +199,7 @@ body{
 .badge.error{background:rgba(192,88,58,0.1);color:var(--red);border-color:rgba(192,88,58,0.3)}
 
 .step-desc{
-  font-size:12px;color:var(--text-dim);
+  font-size:12px;color:var(--text-muted);
   line-height:1.7;
   margin:12px 0 16px;
   padding-left:12px;
@@ -212,7 +222,7 @@ input,select{
   transition:border-color 0.15s;
 }
 input:focus,select:focus{outline:none;border-color:var(--gold-dim)}
-input::placeholder{color:#6a5e4c}
+input::placeholder{color:var(--text-muted)}
 select option{background:var(--bg2)}
 .row{display:flex;gap:8px;margin-bottom:10px}
 .row input,.row select{margin-bottom:0}
@@ -253,7 +263,7 @@ button.action.teal:hover{background:rgba(91,138,130,0.08);border-color:var(--tea
 
 /* ── Status */
 .status-line{
-  font-size:11px;color:var(--text-dim);
+  font-size:11px;color:var(--text-muted);
   margin-top:10px;word-break:break-all;line-height:1.8;
   font-weight:300;
 }
@@ -294,7 +304,6 @@ button.action.teal:hover{background:rgba(91,138,130,0.08);border-color:var(--tea
 .dashboard{
   max-width:680px;margin:0 auto;
   padding:0 24px 60px;
-  display:none;
 }
 .dash-section{
   background:var(--bg2);
@@ -351,7 +360,7 @@ button.action.teal:hover{background:rgba(91,138,130,0.08);border-color:var(--tea
 .dash-btn.warn:hover{background:rgba(192,138,58,0.08)}
 
 .dash-status{
-  font-size:11px;color:var(--text-dim);
+  font-size:11px;color:var(--text-muted);
   margin-top:6px;word-break:break-all;line-height:1.7;
 }
 .dash-status a{color:var(--teal);text-decoration:none}
@@ -390,8 +399,140 @@ footer{
 }
 .footer-links a:hover{color:var(--gold)}
 
+/* ── CTA buttons */
+.cta-row{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-top:28px;
+}
+.cta-btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;font-weight:500;
+  letter-spacing:0.5px;
+  padding:9px 18px;
+  border-radius:3px;
+  cursor:pointer;
+  text-decoration:none;
+  transition:all 0.2s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.cta-btn.primary{
+  background:var(--gold);color:var(--bg);
+  border:1px solid var(--gold);
+}
+.cta-btn.primary:hover{background:var(--gold-pale);border-color:var(--gold-pale)}
+.cta-btn.ghost{
+  background:transparent;color:var(--text-dim);
+  border:1px solid var(--border2);
+}
+.cta-btn.ghost:hover{border-color:var(--gold-dim);color:var(--text)}
+.cta-btn.bug{
+  background:transparent;color:var(--text-muted);
+  border:1px solid var(--border);
+  font-size:10px;
+}
+.cta-btn.bug:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Who it's for */
+.for-section{
+  max-width:680px;margin:0 auto;
+  padding:0 24px 40px;
+}
+.for-eyebrow{
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:14px;
+}
+.for-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px;font-weight:300;line-height:1.35;
+  color:var(--text);margin-bottom:12px;
+}
+.for-headline em{color:var(--gold);font-style:italic}
+.for-body{
+  font-size:12px;line-height:1.85;
+  color:var(--text-dim);
+  max-width:520px;
+}
+
+/* ── Functions grid */
+.fn-section{
+  max-width:680px;margin:0 auto;
+  padding:0 24px 48px;
+}
+.fn-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;margin-top:16px;
+}
+@media(max-width:500px){.fn-grid{grid-template-columns:1fr}}
+.fn-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:16px;
+  position:relative;
+  overflow:hidden;
+}
+.fn-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,var(--gold-dim),transparent);
+}
+.fn-num{
+  font-size:9px;letter-spacing:1px;
+  color:var(--text-muted);margin-bottom:8px;
+}
+.fn-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;font-weight:400;
+  color:var(--text);margin-bottom:6px;
+}
+.fn-desc{
+  font-size:11px;line-height:1.7;
+  color:var(--text-dim);
+}
+
 /* ── Divider */
 .rule{height:1px;background:var(--border);margin:16px 0}
+
+/* ── About */
+.about{
+  max-width:680px;margin:0 auto;
+  padding:0 24px 48px;
+}
+.about-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:400;
+  color:var(--text);
+  margin-bottom:12px;
+  letter-spacing:0.3px;
+}
+.about-body{
+  font-size:12px;line-height:1.9;
+  color:var(--text-dim);
+  margin-bottom:24px;
+}
+.about-body b{color:var(--text)}
+.entity-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:4px;
+}
+@media(max-width:500px){.entity-grid{grid-template-columns:1fr}}
+.entity-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:14px 16px;
+}
+.entity-name{
+  font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:6px;
+}
+.entity-desc{
+  font-size:11px;line-height:1.7;color:var(--text-dim);
+}
 </style>
 </head>
 <body>
@@ -416,18 +557,115 @@ footer{
     <span class="pill gold">✓ Splits never revealed</span>
     <span class="pill gold">✓ Sum enforced by KMS</span>
     <span class="pill teal">Powered by Zama FHEVM</span>
+    <span class="pill">Sepolia testnet</span>
+  </div>
+  <div class="cta-row">
+    <a class="cta-btn primary" href="#section-protocol" onclick="setTimeout(()=>window.scrollToSection('protocol'),50)">Try the Protocol →</a>
+    <a class="cta-btn ghost" href="https://github.com/Shanks239/CipherOps" target="_blank" rel="noopener">GitHub ↗</a>
+    <a class="cta-btn ghost" href="https://sepolia.etherscan.io/address/0x57FefEBE5598A6FbB8aaeA5909c0A703Fe09299F" target="_blank" rel="noopener">Contract ↗</a>
+    <a class="cta-btn bug" href="https://t.me/Zoomfrez" target="_blank" rel="noopener">⚑ Report a bug</a>
   </div>
 </div>
 
-<div class="tab-nav">
-  <div class="tab-track">
-    <button class="tab-btn active" id="tab-demo" onclick="window.switchTab('demo')">Protocol</button>
-    <button class="tab-btn" id="tab-dash" onclick="window.switchTab('dash')">Dashboard</button>
+<div id="section-about">
+
+<!-- Who it's for -->
+<div class="for-section">
+  <div class="for-eyebrow">Who it's for</div>
+  <div class="for-headline">
+    Creatives who negotiate deals<br>and need to <em>keep them private.</em>
+  </div>
+  <div class="for-body">
+    Musicians, producers, songwriters, film composers, game audio directors, IP licensors — anyone who splits revenue with other parties but can't afford to have competitors, platforms, or co-signers see the exact terms. On a public ledger, your deal structure is your leverage. RoyaltyLayer keeps it that way.
   </div>
 </div>
 
-<!-- ── DEMO FLOW ── -->
-<div id="demo-flow">
+<!-- Functions -->
+<div class="fn-section">
+  <div class="for-eyebrow">What it does</div>
+  <div class="fn-grid">
+    <div class="fn-card">
+      <div class="fn-num">01</div>
+      <div class="fn-name">Encrypted split registration</div>
+      <div class="fn-desc">Each rights-holder encrypts their BPS share locally before it touches the chain. The contract stores only ciphertext. No party sees another's percentage.</div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-num">02</div>
+      <div class="fn-name">On-chain sum enforcement</div>
+      <div class="fn-desc">The KMS verifies that encrypted splits sum to 10,000 BPS (100%) and returns a cryptographic proof. The contract activates only on a valid proof.</div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-num">03</div>
+      <div class="fn-name">Private revenue claims</div>
+      <div class="fn-desc">Revenue distributes proportionally using FHE arithmetic. Each party claims and decrypts only their own share. No other party — including the platform — sees what you received.</div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-num">04</div>
+      <div class="fn-name">Auditor access control</div>
+      <div class="fn-desc">Grant a trusted observer — accountant, legal counsel, label A&R — read access to your specific share only. Access is explicit, on-chain, and initiated by you alone.</div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-num">05</div>
+      <div class="fn-name">Independent verification</div>
+      <div class="fn-desc">Every claim is verifiable on Sepolia. Gas usage, transaction hashes, and asset states are all public. Only the split values stay private.</div>
+    </div>
+    <div class="fn-card">
+      <div class="fn-num">06</div>
+      <div class="fn-name">No trusted operator</div>
+      <div class="fn-desc">The contract enforces all rules. There is no admin key, no backend, no platform that can alter your split or intercept your claim. The protocol is the operator.</div>
+    </div>
+  </div>
+</div>
+
+<!-- About / Entities -->
+<div class="about">
+  <div class="about-title">What is RoyaltyLayer?</div>
+  <div class="about-body">
+    When multiple parties share ownership of a creative work — a song, a film score, a licensed IP — they need to agree on how revenue gets split. Putting that agreement on a public blockchain exposes it to everyone: competitors, platforms, and other rights-holders can see exactly how the deal is structured and use that information against you.<br><br>
+    RoyaltyLayer solves this. Each rights-holder encrypts their percentage share <b>locally in their browser</b> before it ever touches the blockchain. The contract verifies that all shares add up to 100% — without ever seeing a single individual value. Revenue distributes proportionally. Each party claims and decrypts only their own amount. No one else sees what you received.
+  </div>
+  <div class="about-title" style="font-size:17px;margin-bottom:14px">Who is involved</div>
+  <div class="entity-grid">
+    <div class="entity-card">
+      <div class="entity-name">Rights Holder</div>
+      <div class="entity-desc">An artist, songwriter, producer, or any party with an ownership stake in a creative asset. Registers their encrypted percentage share and later claims their portion of revenue privately.</div>
+    </div>
+    <div class="entity-card">
+      <div class="entity-name">Deal Registrant</div>
+      <div class="entity-desc">The party who initiates the asset registration — typically one of the rights-holders. Coordinates the initial split setup and submits it on-chain for validation.</div>
+    </div>
+    <div class="entity-card">
+      <div class="entity-name">Distributor</div>
+      <div class="entity-desc">A label, streaming platform, or any entity that owes revenue to the rights-holders. Deposits funds into the contract without knowing how they will be divided among the parties.</div>
+    </div>
+    <div class="entity-card">
+      <div class="entity-name">Observer</div>
+      <div class="entity-desc">A trusted third party — such as an accountant, legal counsel, or auditor — granted read-only access to one specific holder's share. Access is explicit and granted by the holder themselves.</div>
+    </div>
+    <div class="entity-card">
+      <div class="entity-name">KMS</div>
+      <div class="entity-desc">The Zama Key Management Service. Verifies that encrypted splits sum to 10,000 basis points and returns plaintext amounts to authorized users only. Never sees individual split values.</div>
+    </div>
+    <div class="entity-card">
+      <div class="entity-name">Contract</div>
+      <div class="entity-desc">The on-chain logic enforcing all rules — sum validation, state transitions, revenue accounting, and access control. Operates entirely on encrypted data. No plaintext ever stored.</div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /section-about -->
+
+<nav class="section-nav">
+  <div class="section-nav-inner">
+    <button class="snav-btn active" id="snav-about" onclick="window.scrollToSection('about')">About</button>
+    <button class="snav-btn" id="snav-protocol" onclick="window.scrollToSection('protocol')">Protocol</button>
+    <button class="snav-btn" id="snav-dashboard" onclick="window.scrollToSection('dashboard')">Dashboard</button>
+  </div>
+</nav>
+
+<!-- ── PROTOCOL ── -->
+<div id="section-protocol">
+<div class="section-label" style="padding-top:40px">Protocol</div>
 
 <div class="section-label">Registration</div>
 <div class="steps">
@@ -557,10 +795,11 @@ footer{
 </div>
 
 </div><!-- /steps -->
-</div><!-- /demo-flow -->
+</div><!-- /section-protocol -->
 
 <!-- ── DASHBOARD ── -->
-<div class="dashboard" id="dashboard">
+<div class="dashboard" id="section-dashboard">
+<div class="section-label" style="padding-top:8px">Dashboard</div>
 
   <div class="dash-section">
     <div class="dash-section-title">My Assets</div>
@@ -865,7 +1104,7 @@ window.claimShare = async function() {
       `Handle: <span class="mono">${toHex32(rawHandle).slice(0,18)}…</span> · ${txLink(tx.hash)}<br>`+
       `<span style="color:var(--text-muted)">Amount transferred as encrypted token</span>`);
     unlock(4);
-  } catch(e) { setBadge(3,'error','error'); document.getElementById('step3').classList.add('error-state'); const msg3 = (e.shortMessage??e.message??''); setStatus(3,'❌ '+(msg3.includes('no revenue') ? 'No revenue deposited yet. Deposit funds via the Dashboard before claiming.' : msg3)); enableBtn(3); }
+  } catch(e) { setBadge(3,'error','error'); document.getElementById('step3').classList.add('error-state'); setStatus(3,'❌ '+(e.shortMessage??e.message)); enableBtn(3); }
 };
 
 // ── Step 4: Decrypt
@@ -923,14 +1162,39 @@ window.grantObserver = async function() {
 };
 
 // ── Tab switching
-window.switchTab = function(tab) {
-  const isDemo = tab === 'demo';
-  document.getElementById('demo-flow').style.display = isDemo ? 'block' : 'none';
-  document.getElementById('dashboard').style.display  = isDemo ? 'none'  : 'block';
-  document.getElementById('tab-demo').classList.toggle('active', isDemo);
-  document.getElementById('tab-dash').classList.toggle('active', !isDemo);
-  if (!isDemo && signer) window.loadDashboard();
+// ── Section nav
+window.scrollToSection = function(section) {
+  const map = { about:'section-about', protocol:'section-protocol', dashboard:'section-dashboard' };
+  const el = document.getElementById(map[section]);
+  if (!el) return;
+  const offset = 110; // topbar + section nav height
+  const top = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top, behavior:'smooth' });
+  if (section === 'dashboard' && signer) window.loadDashboard();
 };
+
+// Intersection observer to highlight active section
+(function() {
+  const sections = [
+    { id:'section-about',     nav:'snav-about' },
+    { id:'section-protocol',  nav:'snav-protocol' },
+    { id:'section-dashboard', nav:'snav-dashboard' },
+  ];
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        sections.forEach(s => {
+          document.getElementById(s.nav)?.classList.toggle('active', s.id === entry.target.id);
+        });
+        if (entry.target.id === 'section-dashboard' && signer) window.loadDashboard();
+      }
+    });
+  }, { rootMargin:'-40% 0px -55% 0px' });
+  sections.forEach(s => {
+    const el = document.getElementById(s.id);
+    if (el) obs.observe(el);
+  });
+})();
 
 // ── Dashboard loader
 window.loadDashboard = async function() {
@@ -941,7 +1205,7 @@ window.loadDashboard = async function() {
   try {
     const assetIds = await cr.getStakedAssets(userAddr);
     if (!assetIds.length) {
-      dashAssets.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px">No assets found. Register one in Protocol.</div>';
+      dashAssets.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px">No assets found. Register one in the Protocol tab.</div>';
     } else {
       dashAssets.innerHTML = '';
       for (const id of assetIds) {
@@ -1019,7 +1283,13 @@ window.dashClaim = async function(id) {
     if(el) el.textContent = '⏳ Mining…';
     const r = await tx.wait();
     if(el) el.innerHTML = `✓ Claimed · Gas: ${r.gasUsed.toLocaleString()} · ${txLink(tx.hash)}`;
-  } catch(e) { if(el) el.textContent = '❌ '+(e.shortMessage??e.message); }
+  } catch(e) {
+    const raw = (e.shortMessage??e.message??e.reason??'').toLowerCase();
+    let msg = e.shortMessage??e.message;
+    if(raw.includes('no revenue')) msg = 'No revenue deposited yet. Use "+ Deposit Revenue" below to fund this asset first.';
+    else if(raw.includes('already claimed')) msg = 'Already claimed for this asset.';
+    if(el) el.textContent = '❌ ' + msg;
+  }
 };
 
 window.dashDecrypt = async function(id) {
