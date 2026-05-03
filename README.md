@@ -104,4 +104,5 @@ CipherOps/
 - Revenue token is a mock (mintable by anyone on testnet). Production would use a real ERC-20.
 - Sepolia only. Zama's KMS isn't on mainnet yet.
 - Splits are immutable after registration.
+- RoyaltyLayer enforces cryptographic correctness of the split agreement — not the legitimacy of the underlying rights claim. Off-chain legal agreements remain the source of truth for ownership.
 
