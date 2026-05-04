@@ -399,7 +399,84 @@ footer{
 }
 .footer-links a:hover{color:var(--gold)}
 
-/* ── CTA buttons */
+/* ── Account modal */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  width:calc(100% - 40px);
+  max-width:360px;
+  padding:24px;
+  position:relative;
+}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  background:none;border:none;
+  color:var(--text-muted);font-size:18px;
+  cursor:pointer;line-height:1;
+  padding:4px 8px;
+}
+.modal-close:hover{color:var(--text)}
+.modal-label{
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:8px;
+}
+.modal-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:400;
+  color:var(--text);margin-bottom:16px;
+}
+.modal-addr{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:12px 14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--text-dim);
+  word-break:break-all;
+  margin-bottom:12px;
+}
+.modal-addr span{
+  font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-muted);display:block;margin-bottom:4px;
+}
+.modal-actions{display:flex;flex-direction:column;gap:8px}
+.modal-btn{
+  width:100%;padding:11px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;font-weight:500;
+  letter-spacing:0.5px;
+  border-radius:3px;cursor:pointer;
+  transition:all 0.15s;
+  text-align:center;
+}
+.modal-btn.copy{
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--text-dim);
+}
+.modal-btn.copy:hover{border-color:var(--gold-dim);color:var(--gold)}
+.modal-btn.etherscan{
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--text-dim);
+  text-decoration:none;display:block;
+}
+.modal-btn.etherscan:hover{border-color:var(--teal-dim);color:var(--teal)}
+.modal-btn.disconnect{
+  background:rgba(220,80,80,0.08);
+  border:1px solid rgba(220,80,80,0.25);
+  color:#e05555;
+}
+.modal-btn.disconnect:hover{background:rgba(220,80,80,0.15)}
 .cta-row{
   display:flex;flex-wrap:wrap;gap:8px;
   margin-top:28px;
@@ -542,6 +619,24 @@ footer{
 <div class="topbar">
   <div class="logo">Royalty<em>Layer</em></div>
   <button id="connect-btn" onclick="window.connectWallet()" disabled>Loading…</button>
+</div>
+
+<!-- Account modal -->
+<div class="modal-overlay" id="account-modal" onclick="if(event.target===this)window.closeAccountModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="window.closeAccountModal()">×</button>
+    <div class="modal-label">Wallet</div>
+    <div class="modal-title">Account</div>
+    <div class="modal-addr">
+      <span>Connected</span>
+      <span id="modal-full-addr">—</span>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn copy" onclick="window.copyAddress()">Copy Address</button>
+      <a class="modal-btn etherscan" id="modal-etherscan-link" href="#" target="_blank" rel="noopener">Etherscan ↗</a>
+      <button class="modal-btn disconnect" onclick="window.disconnectWallet()">Disconnect</button>
+    </div>
+  </div>
 </div>
 
 <div class="hero">
@@ -945,9 +1040,11 @@ window.connectWallet = async function() {
     walletProvider.on?.('chainChanged', () => window.disconnectWallet());
     walletProvider.on?.('accountsChanged', a => { if(!a.length) window.disconnectWallet(); });
     const addr = await signer.getAddress();
-    btn.textContent = shortAddr(addr) + ' ✕';
+    document.getElementById('modal-full-addr').textContent = addr;
+    document.getElementById('modal-etherscan-link').href = `https://sepolia.etherscan.io/address/${addr}`;
+    btn.textContent = shortAddr(addr);
     btn.className = 'connected';
-    btn.onclick = window.disconnectWallet;
+    btn.onclick = window.openAccountModal;
     const a1 = document.getElementById('addr1');
     if (a1 && !a1.value) a1.value = addr;
     unlock(1);
@@ -955,7 +1052,22 @@ window.connectWallet = async function() {
   } catch(e) { alert('Connection failed: ' + (e.shortMessage ?? e.message)); }
 };
 
+window.openAccountModal = function() {
+  document.getElementById('account-modal').classList.add('open');
+};
+window.closeAccountModal = function() {
+  document.getElementById('account-modal').classList.remove('open');
+};
+window.copyAddress = async function() {
+  const addr = document.getElementById('modal-full-addr').textContent;
+  await navigator.clipboard.writeText(addr);
+  const b = document.querySelector('.modal-btn.copy');
+  b.textContent = 'Copied ✓';
+  setTimeout(() => b.textContent = 'Copy Address', 1500);
+};
+
 window.disconnectWallet = function() {
+  window.closeAccountModal();
   provider=null; signer=null; instance=null; cr=null; token=null; assetId=null; walletProvider=null;
   btn.textContent = 'Connect Wallet';
   btn.className = '';
