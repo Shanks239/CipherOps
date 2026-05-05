@@ -1,0 +1,1396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RoyaltyLayer — Protocol</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=IBM+Plex+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:        #0f0d0b;
+  --bg2:       #161210;
+  --bg3:       #1e1a16;
+  --border:    #2a2318;
+  --border2:   #3a3020;
+  --gold:      #c9a55a;
+  --gold-dim:  #8a6e3a;
+  --gold-pale: #f0dba8;
+  --teal:      #5b8a82;
+  --teal-dim:  #3d6059;
+  --text:      #e8dfc8;
+  --text-dim:  #9a8f7a;
+  --text-muted:#5a5040;
+  --red:       #c0583a;
+  --red-dim:   #7a2e1a;
+  --green:     #6a9e72;
+  --amber:     #c08a3a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:'IBM Plex Mono',monospace;
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  background-image:
+    radial-gradient(ellipse 60% 40% at 70% 0%, rgba(201,165,90,0.04) 0%, transparent 60%),
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+}
+
+/* ── Topbar */
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:14px 24px;
+  border-bottom:1px solid var(--border);
+  position:sticky;top:0;z-index:100;
+  background:rgba(15,13,11,0.92);
+  backdrop-filter:blur(12px);
+}
+.logo{
+  font-family:'Cormorant Garamond',serif;
+  font-size:20px;font-weight:500;
+  letter-spacing:0.5px;
+  color:var(--text);
+}
+.logo em{color:var(--gold);font-style:normal}
+#connect-btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:12px;font-weight:500;
+  background:transparent;
+  color:var(--gold);
+  border:1px solid var(--gold-dim);
+  padding:8px 16px;border-radius:3px;
+  cursor:pointer;
+  letter-spacing:0.5px;
+  transition:all 0.2s;
+  min-height:36px;
+}
+#connect-btn:hover{background:rgba(201,165,90,0.08);border-color:var(--gold)}
+#connect-btn:disabled{opacity:0.4;cursor:not-allowed}
+#connect-btn.connected{background:rgba(106,158,114,0.1);border-color:var(--green);color:var(--green)}
+
+/* ── Hero */
+.hero{
+  max-width:680px;margin:0 auto;
+  padding:52px 24px 40px;
+}
+.hero-eyebrow{
+  font-size:10px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--gold-dim);margin-bottom:16px;
+}
+.hero h1{
+  font-family:'Cormorant Garamond',serif;
+  font-size:clamp(32px,6vw,52px);
+  font-weight:300;line-height:1.15;
+  letter-spacing:-0.5px;
+  color:var(--text);
+  margin-bottom:20px;
+}
+.hero h1 em{color:var(--gold);font-style:italic}
+.hero p{
+  font-size:13px;line-height:1.8;
+  color:var(--text-dim);
+  max-width:520px;
+  margin-bottom:24px;
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:300;
+}
+.pill-row{display:flex;flex-wrap:wrap;gap:6px}
+.pill{
+  font-size:10px;letter-spacing:0.5px;
+  padding:4px 10px;border-radius:2px;
+  background:var(--bg3);
+  border:1px solid var(--border);
+  color:var(--text-muted);
+  font-family:'IBM Plex Mono',monospace;
+}
+.pill.gold{border-color:var(--gold-dim);color:var(--gold);background:rgba(201,165,90,0.05)}
+.pill.teal{border-color:var(--teal-dim);color:var(--teal);background:rgba(91,138,130,0.05)}
+
+/* ── Section nav */
+.section-nav{
+  position:sticky;top:53px;z-index:90;
+  background:rgba(15,13,11,0.95);
+  backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.section-nav-inner{
+  max-width:680px;margin:0 auto;
+  padding:0 24px;
+  display:flex;gap:0;
+}
+.snav-btn{
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;font-weight:400;
+  letter-spacing:0.3px;
+  color:var(--text-muted);
+  background:none;border:none;
+  padding:16px 20px 14px;
+  cursor:pointer;
+  position:relative;
+  transition:color 0.2s;
+}
+.snav-btn::after{
+  content:'';
+  position:absolute;bottom:0;left:20px;right:20px;
+  height:1px;background:var(--gold);
+  transform:scaleX(0);
+  transition:transform 0.2s;
+}
+.snav-btn.active{color:var(--text)}
+.snav-btn.active::after{transform:scaleX(1)}
+.snav-btn:hover{color:var(--text-dim)}
+
+/* ── Section label */
+.section-label{
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-muted);
+  max-width:680px;margin:0 auto 12px;padding:0 24px;
+}
+
+/* ── Step cards */
+.steps{max-width:680px;margin:0 auto;padding:0 24px 60px}
+.step-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:20px;
+  margin-bottom:10px;
+  opacity:0.3;pointer-events:none;
+  transition:opacity 0.25s,border-color 0.25s;
+  position:relative;
+}
+.step-card::before{
+  content:'';
+  position:absolute;top:0;left:0;
+  width:2px;height:100%;
+  background:var(--border2);
+  border-radius:4px 0 0 4px;
+  transition:background 0.25s;
+}
+.step-card.unlocked{opacity:1;pointer-events:all}
+.step-card.done{border-color:var(--teal-dim)}
+.step-card.done::before{background:var(--teal)}
+.step-card.error-state::before{background:var(--red)}
+
+.step-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:4px}
+.step-meta{flex:1}
+.step-num{
+  font-size:9px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:4px;
+}
+.step-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;font-weight:400;
+  color:var(--text);margin-bottom:2px;
+}
+.step-role{font-size:10px;color:var(--text-muted);letter-spacing:0.3px}
+.badge{
+  font-size:9px;letter-spacing:0.5px;text-transform:uppercase;
+  padding:3px 8px;border-radius:2px;
+  background:var(--bg3);color:var(--text-muted);
+  border:1px solid var(--border);
+  white-space:nowrap;margin-left:12px;margin-top:2px;
+}
+.badge.pending{background:rgba(192,138,58,0.1);color:var(--amber);border-color:rgba(192,138,58,0.3)}
+.badge.done{background:rgba(106,158,114,0.1);color:var(--green);border-color:rgba(106,158,114,0.3)}
+.badge.error{background:rgba(192,88,58,0.1);color:var(--red);border-color:rgba(192,88,58,0.3)}
+
+.step-desc{
+  font-size:12px;color:var(--text-muted);
+  line-height:1.7;
+  margin:12px 0 16px;
+  padding-left:12px;
+  border-left:1px solid var(--border2);
+  font-weight:300;
+}
+.step-desc b{color:var(--text-dim);font-weight:500}
+
+/* ── Inputs */
+input,select{
+  width:100%;
+  background:var(--bg);
+  border:1px solid var(--border2);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:3px;
+  font-size:12px;
+  font-family:'IBM Plex Mono',monospace;
+  margin-bottom:10px;
+  transition:border-color 0.15s;
+}
+input:focus,select:focus{outline:none;border-color:var(--gold-dim)}
+input::placeholder{color:var(--text-muted)}
+select option{background:var(--bg2)}
+.row{display:flex;gap:8px;margin-bottom:10px}
+.row input,.row select{margin-bottom:0}
+
+/* ── BPS counter */
+.bps-bar{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:12px;font-size:11px;color:var(--text-muted);
+}
+.bps-val{font-weight:500}
+.bps-val.ok{color:var(--green)}
+.bps-val.over{color:var(--red)}
+.bps-val.under{color:var(--amber)}
+
+/* ── Buttons */
+button.action{
+  width:100%;
+  background:var(--bg3);
+  color:var(--gold);
+  border:1px solid var(--gold-dim);
+  padding:13px;border-radius:3px;
+  font-size:11px;font-weight:500;
+  font-family:'IBM Plex Mono',monospace;
+  letter-spacing:1px;text-transform:uppercase;
+  cursor:pointer;min-height:46px;
+  margin-top:4px;
+  transition:all 0.15s;
+}
+button.action:hover{background:rgba(201,165,90,0.08);border-color:var(--gold)}
+button.action:disabled{
+  background:var(--bg2);color:var(--text-muted);
+  border-color:var(--border);cursor:not-allowed;
+}
+button.action.teal{
+  color:var(--teal);border-color:var(--teal-dim);
+}
+button.action.teal:hover{background:rgba(91,138,130,0.08);border-color:var(--teal)}
+
+/* ── Status */
+.status-line{
+  font-size:11px;color:var(--text-muted);
+  margin-top:10px;word-break:break-all;line-height:1.8;
+  font-weight:300;
+}
+.status-line a{color:var(--teal);text-decoration:none}
+.status-line a:hover{text-decoration:underline}
+.mono{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text-muted);
+  background:var(--bg);padding:2px 6px;
+  border:1px solid var(--border);border-radius:2px;
+}
+
+/* ── KMS timer */
+.kms-timer{
+  font-size:11px;color:var(--amber);
+  margin-top:8px;letter-spacing:0.5px;
+  text-align:center;
+}
+
+/* ── Reveal */
+.reveal-box{
+  text-align:center;padding:24px 0 12px;
+}
+.reveal-amount{
+  font-family:'Cormorant Garamond',serif;
+  font-size:64px;font-weight:300;
+  color:var(--gold);letter-spacing:-2px;
+  line-height:1;
+}
+.reveal-amount span{font-size:24px;color:var(--gold-dim);margin-left:4px}
+.reveal-note{
+  font-size:10px;color:var(--text-muted);
+  letter-spacing:0.5px;text-transform:uppercase;
+  margin-top:8px;
+}
+
+/* ── Dashboard */
+.dashboard{
+  max-width:680px;margin:0 auto;
+  padding:0 24px 60px;
+}
+.dash-section{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:20px;
+  margin-bottom:12px;
+}
+.dash-section-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:18px;font-weight:400;
+  color:var(--text);margin-bottom:4px;
+}
+.dash-section-sub{font-size:11px;color:var(--text-muted);margin-bottom:16px}
+
+.asset-card{
+  border:1px solid var(--border2);
+  border-radius:3px;padding:14px;
+  margin-bottom:8px;
+  background:var(--bg);
+}
+.asset-card-header{
+  display:flex;justify-content:space-between;
+  align-items:center;margin-bottom:8px;
+}
+.asset-id{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;color:var(--text-muted);
+}
+.state-badge{
+  font-size:9px;letter-spacing:0.5px;text-transform:uppercase;
+  padding:2px 8px;border-radius:2px;border:1px solid;
+}
+.state-active{color:var(--green);border-color:rgba(106,158,114,0.3);background:rgba(106,158,114,0.08)}
+.state-pending{color:var(--amber);border-color:rgba(192,138,58,0.3);background:rgba(192,138,58,0.08)}
+.state-invalid{color:var(--red);border-color:rgba(192,88,58,0.3);background:rgba(192,88,58,0.08)}
+.asset-meta{font-size:11px;color:var(--text-muted);margin-bottom:10px}
+
+.dash-btn-row{display:flex;gap:8px;margin-bottom:6px}
+.dash-btn{
+  flex:1;padding:9px;border-radius:3px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:10px;font-weight:500;letter-spacing:0.8px;text-transform:uppercase;
+  cursor:pointer;min-height:38px;border:1px solid;
+  transition:all 0.15s;background:transparent;
+}
+.dash-btn.gold{color:var(--gold);border-color:var(--gold-dim)}
+.dash-btn.gold:hover{background:rgba(201,165,90,0.08)}
+.dash-btn.teal{color:var(--teal);border-color:var(--teal-dim)}
+.dash-btn.teal:hover{background:rgba(91,138,130,0.08)}
+.dash-btn.muted{color:var(--text-muted);border-color:var(--border2)}
+.dash-btn.muted:hover{color:var(--text-dim);border-color:var(--border2)}
+.dash-btn.warn{color:var(--amber);border-color:rgba(192,138,58,0.3)}
+.dash-btn.warn:hover{background:rgba(192,138,58,0.08)}
+
+.dash-status{
+  font-size:11px;color:var(--text-muted);
+  margin-top:6px;word-break:break-all;line-height:1.7;
+}
+.dash-status a{color:var(--teal);text-decoration:none}
+
+.dash-reveal{
+  font-family:'Cormorant Garamond',serif;
+  font-size:36px;font-weight:300;
+  color:var(--gold);display:inline;
+}
+
+/* ── Error banner */
+.err-banner{
+  display:none;position:fixed;top:0;left:0;right:0;
+  background:var(--red-dim);color:#fca5a5;
+  padding:10px 16px;font-size:11px;z-index:999;
+  border-bottom:1px solid var(--red);
+}
+
+/* ── Footer */
+footer{
+  max-width:680px;margin:0 auto;
+  padding:32px 24px 48px;
+  border-top:1px solid var(--border);
+  display:flex;justify-content:space-between;align-items:center;
+  flex-wrap:wrap;gap:12px;
+}
+.footer-brand{
+  font-family:'Cormorant Garamond',serif;
+  font-size:14px;color:var(--text-muted);
+}
+.footer-links{display:flex;gap:16px}
+.footer-links a{
+  font-size:10px;letter-spacing:0.5px;text-transform:uppercase;
+  color:var(--text-muted);text-decoration:none;
+  transition:color 0.15s;
+}
+.footer-links a:hover{color:var(--gold)}
+
+/* ── Account modal */
+.modal-overlay{
+  display:none;position:fixed;inset:0;z-index:200;
+  background:rgba(0,0,0,0.6);
+  backdrop-filter:blur(4px);
+  align-items:center;justify-content:center;
+}
+.modal-overlay.open{display:flex}
+.modal-box{
+  background:var(--bg2);
+  border:1px solid var(--border2);
+  border-radius:8px;
+  width:calc(100% - 40px);
+  max-width:360px;
+  padding:24px;
+  position:relative;
+}
+.modal-close{
+  position:absolute;top:16px;right:16px;
+  background:none;border:none;
+  color:var(--text-muted);font-size:18px;
+  cursor:pointer;line-height:1;
+  padding:4px 8px;
+}
+.modal-close:hover{color:var(--text)}
+.modal-label{
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:8px;
+}
+.modal-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:400;
+  color:var(--text);margin-bottom:16px;
+}
+.modal-addr{
+  background:var(--bg3);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:12px 14px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;
+  color:var(--text-dim);
+  word-break:break-all;
+  margin-bottom:12px;
+}
+.modal-addr span{
+  font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  color:var(--text-muted);display:block;margin-bottom:4px;
+}
+.modal-actions{display:flex;flex-direction:column;gap:8px}
+.modal-btn{
+  width:100%;padding:11px;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;font-weight:500;
+  letter-spacing:0.5px;
+  border-radius:3px;cursor:pointer;
+  transition:all 0.15s;
+  text-align:center;
+}
+.modal-btn.copy{
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--text-dim);
+}
+.modal-btn.copy:hover{border-color:var(--gold-dim);color:var(--gold)}
+.modal-btn.etherscan{
+  background:transparent;
+  border:1px solid var(--border2);
+  color:var(--text-dim);
+  text-decoration:none;display:block;
+}
+.modal-btn.etherscan:hover{border-color:var(--teal-dim);color:var(--teal)}
+.modal-btn.disconnect{
+  background:rgba(220,80,80,0.08);
+  border:1px solid rgba(220,80,80,0.25);
+  color:#e05555;
+}
+.modal-btn.disconnect:hover{background:rgba(220,80,80,0.15)}
+.cta-row{
+  display:flex;flex-wrap:wrap;gap:8px;
+  margin-top:28px;
+}
+.cta-btn{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:11px;font-weight:500;
+  letter-spacing:0.5px;
+  padding:9px 18px;
+  border-radius:3px;
+  cursor:pointer;
+  text-decoration:none;
+  transition:all 0.2s;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.cta-btn.primary{
+  background:var(--gold);color:var(--bg);
+  border:1px solid var(--gold);
+}
+.cta-btn.primary:hover{background:var(--gold-pale);border-color:var(--gold-pale)}
+.cta-btn.ghost{
+  background:transparent;color:var(--text-dim);
+  border:1px solid var(--border2);
+}
+.cta-btn.ghost:hover{border-color:var(--gold-dim);color:var(--text)}
+.cta-btn.bug{
+  background:transparent;color:var(--text-muted);
+  border:1px solid var(--border);
+  font-size:10px;
+}
+.cta-btn.bug:hover{border-color:var(--red);color:var(--red)}
+
+/* ── Who it's for */
+.for-section{
+  max-width:680px;margin:0 auto;
+  padding:0 24px 40px;
+}
+.for-eyebrow{
+  font-size:9px;letter-spacing:2px;text-transform:uppercase;
+  color:var(--text-muted);margin-bottom:14px;
+}
+.for-headline{
+  font-family:'Cormorant Garamond',serif;
+  font-size:26px;font-weight:300;line-height:1.35;
+  color:var(--text);margin-bottom:12px;
+}
+.for-headline em{color:var(--gold);font-style:italic}
+.for-body{
+  font-size:12px;line-height:1.85;
+  color:var(--text-dim);
+  max-width:520px;
+}
+
+/* ── Functions grid */
+.fn-section{
+  max-width:680px;margin:0 auto;
+  padding:0 24px 48px;
+}
+.fn-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;margin-top:16px;
+}
+@media(max-width:500px){.fn-grid{grid-template-columns:1fr}}
+.fn-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:16px;
+  position:relative;
+  overflow:hidden;
+}
+.fn-card::before{
+  content:'';
+  position:absolute;top:0;left:0;right:0;
+  height:1px;
+  background:linear-gradient(90deg,var(--gold-dim),transparent);
+}
+.fn-num{
+  font-size:9px;letter-spacing:1px;
+  color:var(--text-muted);margin-bottom:8px;
+}
+.fn-name{
+  font-family:'Cormorant Garamond',serif;
+  font-size:16px;font-weight:400;
+  color:var(--text);margin-bottom:6px;
+}
+.fn-desc{
+  font-size:11px;line-height:1.7;
+  color:var(--text-dim);
+}
+
+/* ── Divider */
+.rule{height:1px;background:var(--border);margin:16px 0}
+
+/* ── About */
+.about{
+  max-width:680px;margin:0 auto;
+  padding:0 24px 48px;
+}
+.about-title{
+  font-family:'Cormorant Garamond',serif;
+  font-size:22px;font-weight:400;
+  color:var(--text);
+  margin-bottom:12px;
+  letter-spacing:0.3px;
+}
+.about-body{
+  font-size:12px;line-height:1.9;
+  color:var(--text-dim);
+  margin-bottom:24px;
+}
+.about-body b{color:var(--text)}
+.entity-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:4px;
+}
+@media(max-width:500px){.entity-grid{grid-template-columns:1fr}}
+.entity-card{
+  background:var(--bg2);
+  border:1px solid var(--border);
+  border-radius:4px;
+  padding:14px 16px;
+}
+.entity-name{
+  font-size:11px;letter-spacing:1.5px;text-transform:uppercase;
+  color:var(--gold);margin-bottom:6px;
+}
+.entity-desc{
+  font-size:11px;line-height:1.7;color:var(--text-dim);
+}
+</style>
+</head>
+
+<body>
+
+<div class="err-banner" id="err-banner"></div>
+
+<div class="topbar">
+  <a href="index.html" style="text-decoration:none"><div class="logo">Royalty<em>Layer</em></div></a>
+  <button id="connect-btn" onclick="window.connectWallet()" disabled>Loading…</button>
+</div>
+
+<!-- Account modal -->
+<div class="modal-overlay" id="account-modal" onclick="if(event.target===this)window.closeAccountModal()">
+  <div class="modal-box">
+    <button class="modal-close" onclick="window.closeAccountModal()">×</button>
+    <div class="modal-label">Wallet</div>
+    <div class="modal-title">Account</div>
+    <div class="modal-addr">
+      <span>Connected</span>
+      <span id="modal-full-addr">—</span>
+    </div>
+    <div class="modal-actions">
+      <button class="modal-btn copy" onclick="window.copyAddress()">Copy Address</button>
+      <a class="modal-btn etherscan" id="modal-etherscan-link" href="#" target="_blank" rel="noopener">Etherscan ↗</a>
+      <button class="modal-btn disconnect" onclick="window.disconnectWallet()">Disconnect</button>
+    </div>
+  </div>
+</div>
+
+<div class="hero">
+  <div class="hero-eyebrow">Confidential IP infrastructure · Sepolia testnet</div>
+  <h1>Private royalty splits,<br><em>enforced on-chain</em></h1>
+  <p>
+    Rights-holders register encrypted percentage splits that stay hidden from each other,
+    the platform, and the operator. The contract enforces that splits sum to 100% — without
+    ever seeing the individual values. Revenue distributes proportionally on encrypted weights.
+    Only you can decrypt your share.
+  </p>
+  <div class="pill-row">
+    <span class="pill gold">✓ Splits never revealed</span>
+    <span class="pill gold">✓ Sum enforced by KMS</span>
+    <span class="pill teal">Powered by Zama FHEVM</span>
+    <span class="pill">Sepolia testnet</span>
+  </div>
+  <div class="cta-row">
+    
+    <a class="cta-btn ghost" href="https://github.com/Shanks239/CipherOps" target="_blank" rel="noopener">GitHub ↗</a>
+    <a class="cta-btn ghost" href="https://sepolia.etherscan.io/address/0x57FefEBE5598A6FbB8aaeA5909c0A703Fe09299F" target="_blank" rel="noopener">Contract ↗</a>
+    <a class="cta-btn bug" href="https://t.me/Zoomfrez" target="_blank" rel="noopener">⚑ Report a bug</a>
+  </div>
+</div>
+
+
+<nav class="section-nav">
+  <div class="section-nav-inner">
+    
+    <button class="snav-btn active" id="snav-protocol" onclick="window.scrollToSection('protocol')">Protocol</button>
+    <button class="snav-btn" id="snav-dashboard" onclick="window.scrollToSection('dashboard')">Dashboard</button>
+  </div>
+</nav>
+
+<!-- ── PROTOCOL ── -->
+<div id="section-protocol">
+<div class="section-label" style="padding-top:40px">Protocol</div>
+
+<div class="section-label">Registration</div>
+<div class="steps">
+
+<div class="step-card" id="step1">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-num">Step 01</div>
+      <div class="step-title">Register Asset Splits</div>
+      <div class="step-role">Actor: Rights Holder / Deal Registrant</div>
+    </div>
+    <span class="badge" id="badge1">idle</span>
+  </div>
+  <div class="step-desc">
+    Each rights-holder's percentage (in basis points) is <b>encrypted locally</b> before
+    being sent on-chain. The contract stores only encrypted handles — individual splits
+    are never visible. BPS must sum to 10,000 (= 100%). Max 8 stakeholders.
+  </div>
+  <div class="row">
+    <input id="asset-name" placeholder="Asset ID (e.g. track-001)" value="track-001" style="flex:2;margin-bottom:0">
+    <select id="stakeholder-count" onchange="window.updateStakeholderRows()" style="flex:1;margin-bottom:0">
+      <option value="2">2 holders</option>
+      <option value="3">3 holders</option>
+      <option value="4">4 holders</option>
+      <option value="5">5 holders</option>
+      <option value="6">6 holders</option>
+      <option value="7">7 holders</option>
+      <option value="8">8 holders</option>
+    </select>
+  </div>
+  <div style="margin-top:10px" id="stakeholder-rows"></div>
+  <div class="bps-bar">
+    <span>Basis points remaining</span>
+    <span class="bps-val under" id="bps-left">10000</span>
+  </div>
+  <button class="action" onclick="window.registerAsset()">Encrypt &amp; Register Splits</button>
+  <div class="status-line" id="status1"></div>
+</div>
+
+<div class="step-card" id="step2">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-num">Step 02</div>
+      <div class="step-title">Validate Split Integrity</div>
+      <div class="step-role">Actor: Anyone (permissionless)</div>
+    </div>
+    <span class="badge" id="badge2">idle</span>
+  </div>
+  <div class="step-desc">
+    The <b>KMS (Key Management Service)</b> decrypts only the encrypted sum and returns a
+    cryptographic proof. The contract verifies on-chain: if sum = 10,000, the asset
+    activates. Individual splits are never revealed — not even to the KMS.
+  </div>
+  <button class="action" onclick="window.validateSplits()">Validate &amp; Activate</button>
+  <div class="kms-timer" id="kms-timer"></div>
+  <div class="status-line" id="status2"></div>
+</div>
+
+</div><!-- /steps -->
+
+<div class="section-label">Claims</div>
+<div class="steps">
+
+<div class="step-card" id="step3">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-num">Step 03</div>
+      <div class="step-title">Claim Your Share</div>
+      <div class="step-role">Actor: Rights Holder</div>
+    </div>
+    <span class="badge" id="badge3">idle</span>
+  </div>
+  <div class="step-desc">
+    Claim independently, at any time. The contract computes
+    <b>your entitlement = total revenue × your encrypted split ÷ 10,000</b> entirely in FHE —
+    without decrypting either operand. Tokens transfer as an encrypted amount. No other
+    party sees what you received.
+  </div>
+  <button class="action" onclick="window.claimShare()">Claim My Share</button>
+  <div class="status-line" id="status3"></div>
+</div>
+
+<div class="step-card" id="step4">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-num">Step 04</div>
+      <div class="step-title">Decrypt Your Amount</div>
+      <div class="step-role">Actor: Rights Holder (private)</div>
+    </div>
+    <span class="badge" id="badge4">idle</span>
+  </div>
+  <div class="step-desc">
+    Sign once with your wallet to authorize a <b>user-scoped decryption</b>. The KMS
+    returns your plaintext amount directly to your browser — it never appears on-chain.
+    Other rights-holders and the platform see nothing.
+  </div>
+  <button class="action" onclick="window.decryptClaimed()">Reveal My Amount</button>
+  <div id="reveal-box" style="display:none" class="reveal-box">
+    <div class="reveal-amount"><span id="reveal-value">0</span><span>tokens</span></div>
+    <div class="reveal-note">Your split percentage remains encrypted on-chain</div>
+  </div>
+  <div class="status-line" id="status4"></div>
+</div>
+
+</div><!-- /steps -->
+
+<div class="section-label">Compliance</div>
+<div class="steps">
+
+<div class="step-card" id="step5">
+  <div class="step-header">
+    <div class="step-meta">
+      <div class="step-num">Step 05</div>
+      <div class="step-title">Grant Observer Access</div>
+      <div class="step-role">Actor: Rights Holder → Compliance Observer</div>
+    </div>
+    <span class="badge" id="badge5">idle</span>
+  </div>
+  <div class="step-desc">
+    Voluntarily grant a <b>compliance observer</b> (manager, auditor, label) read access
+    to your encrypted split and claimed total. The grant is permanent in v1 — it cannot be
+    revoked without redeploying. Grant only to trusted parties.
+  </div>
+  <input id="observer-addr" placeholder="Observer wallet address">
+  <button class="action teal" onclick="window.grantObserver()">Grant Observer Access</button>
+  <div class="status-line" id="status5"></div>
+</div>
+
+</div><!-- /steps -->
+</div><!-- /section-protocol -->
+
+<!-- ── DASHBOARD ── -->
+<div class="dashboard" id="section-dashboard">
+<div class="section-label" style="padding-top:8px">Dashboard</div>
+
+  <div class="dash-section">
+    <div class="dash-section-title">My Assets</div>
+    <div class="dash-section-sub">Assets where you are a stakeholder or registrant</div>
+    <div id="dash-assets">
+      <div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px">
+        Connect wallet to load your assets
+      </div>
+    </div>
+  </div>
+
+  <div class="dash-section">
+    <div class="dash-section-title">Observed Assets</div>
+    <div class="dash-section-sub">Assets you have observer access to</div>
+    <div id="dash-observed">
+      <div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px">
+        Connect wallet to load observed assets
+      </div>
+    </div>
+  </div>
+
+</div><!-- /dashboard -->
+
+<footer>
+  <div class="footer-brand">RoyaltyLayer · Sepolia testnet · v1</div>
+  <div class="footer-links">
+    <a href="https://github.com/Shanks239/CipherOps" target="_blank">GitHub</a>
+    <a href="https://sepolia.etherscan.io/address/0x57FefEBE5598A6FbB8aaeA5909c0A703Fe09299F" target="_blank">Contract</a>
+    <a href="https://www.zama.ai/fhevm" target="_blank">Zama FHEVM</a>
+  </div>
+</footer>
+
+<script type="module">
+// ── Load bundles
+function showErr(msg) {
+  const b = document.getElementById('err-banner');
+  b.textContent = msg; b.style.display = 'block';
+}
+
+let ethers, createInstance, SepoliaConfig;
+
+try {
+  const m = await import('./ethers-bundle.js');
+  ethers = m.ethers ?? m;
+} catch(e) { showErr('ethers failed: ' + e.message); }
+
+try {
+  const m = await import('./sdk-bundle.js');
+  createInstance = m.createInstance;
+  SepoliaConfig = m.SepoliaConfig;
+  if (m.initSDK) await m.initSDK();
+} catch(e) { showErr('SDK failed: ' + e.message); }
+
+// ── Config
+const CR_ADDR    = "0x57FefEBE5598A6FbB8aaeA5909c0A703Fe09299F";
+const TOKEN_ADDR = "0x742626Ff76cAcf2426a9B300cE25efEe1981217e";
+const RPC        = "https://ethereum-sepolia-rpc.publicnode.com";
+const SCAN       = "https://sepolia.etherscan.io/tx/";
+const STATES     = ["UNREGISTERED","PENDING","ACTIVE","INVALID"];
+
+const CR_ABI = [
+  "function registerAsset(bytes32,address[],bytes32[],bytes) external",
+  "function markSumDecryptable(bytes32) external",
+  "function confirmValidation(bytes32,uint16,bytes) external",
+  "function depositRevenue(bytes32,bytes32,bytes) external",
+  "function claimShare(bytes32) external",
+  "function grantObserver(bytes32,address) external",
+  "function getAssetState(bytes32) view returns (uint8)",
+  "function getEncSum(bytes32) view returns (uint256)",
+  "function getEncClaimed(bytes32,address) view returns (uint256)",
+  "function getStakedAssets(address) view returns (bytes32[])",
+  "function getStakeholders(bytes32) view returns (address[],uint8)",
+  "function getEncShare(bytes32,address) view returns (uint256)",
+  "event ObserverGranted(bytes32 indexed assetId, address indexed stakeholder, address indexed observer)",
+];
+const TOKEN_ABI = ["function mintPlaintext(address,uint128) external"];
+
+// ── State
+let provider, signer, instance, cr, token, assetId, walletProvider;
+const walletProviders = [];
+
+// ── EIP-6963
+window.addEventListener("eip6963:announceProvider", e => walletProviders.push(e.detail));
+window.dispatchEvent(new Event("eip6963:requestProvider"));
+await new Promise(r => setTimeout(r, 200));
+
+// Enable connect button
+const btn = document.getElementById('connect-btn');
+btn.disabled = false;
+btn.textContent = 'Connect Wallet';
+
+function getProvider() {
+  if (walletProviders.length >= 1) {
+    const pref = walletProviders.find(w =>
+      w.info.name.toLowerCase().includes('metamask') ||
+      w.info.name.toLowerCase().includes('rabby')
+    );
+    return (pref ?? walletProviders[0]).provider;
+  }
+  return window.ethereum ?? null;
+}
+
+// ── Helpers
+const shortAddr = a => a.slice(0,6)+'…'+a.slice(-4);
+const toHex32   = v => '0x'+BigInt(v).toString(16).padStart(64,'0');
+const txLink    = h => `<a href="${SCAN}${h}" target="_blank">${h.slice(0,10)}…${h.slice(-6)}</a>`;
+const setStatus = (n,h) => document.getElementById('status'+n).innerHTML = h;
+const setBadge  = (n,c,t) => { const b=document.getElementById('badge'+n); b.className='badge '+c; b.textContent=t; };
+const unlock    = n => document.getElementById('step'+n).classList.add('unlocked');
+const markDone  = n => { document.getElementById('step'+n).classList.add('done'); document.getElementById('step'+n).classList.remove('error-state'); };
+const disableBtn= n => { const b=document.querySelector(`#step${n} button.action`); if(b) b.disabled=true; };
+const enableBtn = n => { const b=document.querySelector(`#step${n} button.action`); if(b) b.disabled=false; };
+
+// ── Connect
+window.connectWallet = async function() {
+  try {
+    walletProvider = getProvider();
+    if (!walletProvider) {
+      alert('No wallet detected.\n\nMobile: open in MetaMask or Rabby browser.\nDesktop: install MetaMask or Rabby extension.');
+      return;
+    }
+    provider = new ethers.BrowserProvider(walletProvider);
+    await provider.send('eth_requestAccounts', []);
+    signer = await provider.getSigner();
+    const net = await provider.getNetwork();
+    if (Number(net.chainId) !== 11155111) {
+      try {
+        await walletProvider.request({ method:'wallet_switchEthereumChain', params:[{chainId:'0xaa36a7'}] });
+      } catch(sw) {
+        if (sw.code === 4902 || sw.code === -32603) {
+          await walletProvider.request({ method:'wallet_addEthereumChain', params:[{
+            chainId:'0xaa36a7', chainName:'Sepolia',
+            nativeCurrency:{name:'Ether',symbol:'ETH',decimals:18},
+            rpcUrls:[RPC], blockExplorerUrls:['https://sepolia.etherscan.io']
+          }]});
+        } else { alert('Switch to Sepolia failed: ' + sw.message); return; }
+      }
+    }
+    signer = await provider.getSigner();
+    cr    = new ethers.Contract(CR_ADDR, CR_ABI, signer);
+    token = new ethers.Contract(TOKEN_ADDR, TOKEN_ABI, signer);
+    instance = await createInstance({ ...SepoliaConfig, network: RPC });
+    walletProvider.on?.('chainChanged', () => window.disconnectWallet());
+    walletProvider.on?.('accountsChanged', a => { if(!a.length) window.disconnectWallet(); });
+    const addr = await signer.getAddress();
+    document.getElementById('modal-full-addr').textContent = addr;
+    document.getElementById('modal-etherscan-link').href = `https://sepolia.etherscan.io/address/${addr}`;
+    btn.textContent = shortAddr(addr);
+    btn.className = 'connected';
+    btn.onclick = window.openAccountModal;
+    const a1 = document.getElementById('addr1');
+    if (a1 && !a1.value) a1.value = addr;
+    unlock(1);
+    setStatus(1, `<span style="color:var(--green)">● Connected · Sepolia · ${addr.slice(0,10)}…</span>`);
+  } catch(e) { alert('Connection failed: ' + (e.shortMessage ?? e.message)); }
+};
+
+window.openAccountModal = function() {
+  document.getElementById('account-modal').classList.add('open');
+};
+window.closeAccountModal = function() {
+  document.getElementById('account-modal').classList.remove('open');
+};
+window.copyAddress = async function() {
+  const addr = document.getElementById('modal-full-addr').textContent;
+  await navigator.clipboard.writeText(addr);
+  const b = document.querySelector('.modal-btn.copy');
+  b.textContent = 'Copied ✓';
+  setTimeout(() => b.textContent = 'Copy Address', 1500);
+};
+
+window.disconnectWallet = function() {
+  window.closeAccountModal();
+  provider=null; signer=null; instance=null; cr=null; token=null; assetId=null; walletProvider=null;
+  btn.textContent = 'Connect Wallet';
+  btn.className = '';
+  btn.onclick = window.connectWallet;
+  for(let i=1;i<=5;i++){
+    document.getElementById('step'+i).classList.remove('unlocked','done','error-state');
+    setBadge(i,'','idle'); setStatus(i,''); enableBtn(i);
+  }
+  document.getElementById('reveal-box').style.display = 'none';
+  const nf = document.getElementById('asset-name');
+  const m = nf.value.match(/^(.*?)(-\d+)?$/);
+  nf.value = (m[1]||'track') + '-' + (parseInt((m[2]||'-0').slice(1))+1);
+  window.updateStakeholderRows();
+};
+
+// ── Step 1 helpers
+window.updateStakeholderRows = function() {
+  const n = parseInt(document.getElementById('stakeholder-count').value);
+  const container = document.getElementById('stakeholder-rows');
+  container.innerHTML = '';
+  const even = Math.floor(10000/n);
+  const rem  = 10000 - even*(n-1);
+  for (let i = 1; i <= n; i++) {
+    const row = document.createElement('div');
+    row.className = 'row'; row.style.marginBottom = '8px';
+    row.innerHTML = `
+      <input id="addr${i}" placeholder="Holder ${i} address" style="flex:2;margin-bottom:0"
+        oninput="window.updateBpsLeft()">
+      <input id="bps${i}" placeholder="BPS" value="${i===n?rem:even}"
+        style="flex:1;margin-bottom:0" type="number" min="1" max="9999"
+        oninput="window.updateBpsLeft()">
+    `;
+    container.appendChild(row);
+  }
+  const a1 = document.getElementById('addr1');
+  if (a1 && signer && !a1.value) signer.getAddress().then(a => { if(!a1.value) a1.value=a; });
+  window.updateBpsLeft();
+};
+
+window.updateBpsLeft = function() {
+  const n = parseInt(document.getElementById('stakeholder-count').value);
+  let total = 0;
+  for (let i=1;i<=n;i++) { const v=parseInt(document.getElementById('bps'+i)?.value||0); if(!isNaN(v)) total+=v; }
+  const left = 10000 - total;
+  const el = document.getElementById('bps-left');
+  if (!el) return;
+  el.textContent = left;
+  el.className = 'bps-val ' + (left===0?'ok':left<0?'over':'under');
+};
+
+// ── Step 1: Register
+window.registerAsset = async function() {
+  const n = parseInt(document.getElementById('stakeholder-count').value);
+  const name = document.getElementById('asset-name').value.trim();
+  if (!name) { setStatus(1,'❌ Enter an asset name.'); return; }
+  const addrs=[],bpsList=[];
+  for (let i=1;i<=n;i++) {
+    const a=document.getElementById('addr'+i)?.value.trim();
+    const b=parseInt(document.getElementById('bps'+i)?.value);
+    if (!a) { setStatus(1,`❌ Fill address for holder ${i}.`); return; }
+    if (isNaN(b)||b<=0) { setStatus(1,`❌ Invalid BPS for holder ${i}.`); return; }
+    addrs.push(a); bpsList.push(b);
+  }
+  const sum = bpsList.reduce((a,b)=>a+b,0);
+  if (sum !== 10000) {
+    setStatus(1,`❌ BPS must sum to 10,000. Current: ${sum}. Difference: ${10000-sum}`);
+    setBadge(1,'error','invalid'); return;
+  }
+  disableBtn(1); setBadge(1,'pending','encrypting…');
+  setStatus(1,'⏳ Encrypting splits locally…');
+  await new Promise(r=>setTimeout(r,60));
+  try {
+    const candidate = ethers.keccak256(ethers.toUtf8Bytes(name));
+    const existingState = await cr.getAssetState(candidate);
+    if (Number(existingState) !== 0) {
+      const suggestion = name + '-' + Date.now().toString().slice(-4);
+      document.getElementById('asset-name').value = suggestion;
+      setStatus(1,`❌ "<b>${name}</b>" already registered (${STATES[Number(existingState)]}). Suggested: <b>${suggestion}</b>`);
+      setBadge(1,'error','exists'); enableBtn(1); return;
+    }
+    assetId = candidate;
+    const userAddr = await signer.getAddress();
+    const inp = instance.createEncryptedInput(CR_ADDR, userAddr);
+    for (const b of bpsList) inp.add16(b);
+    const enc = await inp.encrypt();
+    setBadge(1,'pending','confirm wallet…');
+    setStatus(1,'⏳ Awaiting wallet confirmation…');
+    const tx = await cr.registerAsset(assetId, addrs, bpsList.map((_,i)=>enc.handles[i]), enc.inputProof);
+    setBadge(1,'pending','mining…');
+    setStatus(1,'⏳ Mining…');
+    const receipt = await tx.wait();
+    setBadge(1,'done','done'); markDone(1);
+    setStatus(1,
+      `✓ ${n} splits registered · Gas: ${receipt.gasUsed.toLocaleString()}<br>`+
+      `Asset: <span class="mono">${name}</span> · ${txLink(tx.hash)}<br>`+
+      `<span style="color:var(--text-muted)">Individual splits are encrypted — no one can read them on-chain</span>`);
+    unlock(2);
+  } catch(e) { setBadge(1,'error','error'); document.getElementById('step1').classList.add('error-state'); setStatus(1,'❌ '+(e.shortMessage??e.message)); enableBtn(1); }
+};
+
+// ── Step 2: Validate
+window.validateSplits = async function() {
+  disableBtn(2); setBadge(2,'pending','marking…');
+  setStatus(2,'⏳ Step 1/3: marking encrypted sum for decryption…');
+  try {
+    const tx1 = await cr.markSumDecryptable(assetId);
+    await tx1.wait();
+    setBadge(2,'pending','KMS…');
+    setStatus(2,'⏳ Step 2/3: KMS decrypting the encrypted sum…');
+    let secs=0;
+    const timer = setInterval(()=>{ secs++; document.getElementById('kms-timer').textContent=`KMS working… ${secs}s`; },1000);
+    const rawHandle = await cr.getEncSum(assetId);
+    const h = toHex32(rawHandle);
+    const result = await instance.publicDecrypt([h]);
+    clearInterval(timer);
+    const decryptedSum = result.clearValues[h];
+    document.getElementById('kms-timer').textContent = `✓ KMS responded in ${secs}s`;
+    setBadge(2,'pending','confirming…');
+    setStatus(2,`⏳ Step 3/3: sum = <b style="color:var(--green)">${decryptedSum}</b> · submitting proof…`);
+    const tx2 = await cr.confirmValidation(assetId, decryptedSum, result.decryptionProof);
+    await tx2.wait();
+    const state = STATES[Number(await cr.getAssetState(assetId))]??'UNKNOWN';
+    setBadge(2,'done','done'); markDone(2);
+    setStatus(2,
+      `✓ Integrity verified · Sum = ${decryptedSum} bps · State: <b style="color:var(--green)">${state}</b><br>`+
+      `${txLink(tx2.hash)}<br>`+
+      `<span style="color:var(--text-muted)">Individual splits remain encrypted — only the sum was verified</span>`);
+    unlock(3);
+  } catch(e) { setBadge(2,'error','error'); document.getElementById('step2').classList.add('error-state'); setStatus(2,'❌ '+(e.shortMessage??e.message)); enableBtn(2); }
+};
+
+// ── Step 3: Claim
+window.claimShare = async function() {
+  disableBtn(3); setBadge(3,'pending','confirm wallet…');
+  setStatus(3,'⏳ Awaiting wallet confirmation…');
+  try {
+    const tx = await cr.claimShare(assetId);
+    setBadge(3,'pending','mining…');
+    setStatus(3,'⏳ Computing encrypted entitlement on-chain…');
+    const receipt = await tx.wait();
+    const userAddr = await signer.getAddress();
+    const rawHandle = await cr.getEncClaimed(assetId, userAddr);
+    setBadge(3,'done','done'); markDone(3);
+    setStatus(3,
+      `✓ Share claimed · Gas: ${receipt.gasUsed.toLocaleString()}<br>`+
+      `Handle: <span class="mono">${toHex32(rawHandle).slice(0,18)}…</span> · ${txLink(tx.hash)}<br>`+
+      `<span style="color:var(--text-muted)">Amount transferred as encrypted token</span>`);
+    unlock(4);
+  } catch(e) { setBadge(3,'error','error'); document.getElementById('step3').classList.add('error-state'); setStatus(3,'❌ '+(e.shortMessage??e.message)); enableBtn(3); }
+};
+
+// ── Step 4: Decrypt
+window.decryptClaimed = async function() {
+  disableBtn(4); setBadge(4,'pending','sign…');
+  setStatus(4,'⏳ Sign in your wallet to authorize decryption…');
+  try {
+    const userAddr = await signer.getAddress();
+    const rawHandle = await cr.getEncClaimed(assetId, userAddr);
+    const encClaimed = toHex32(rawHandle);
+    const {publicKey, privateKey} = instance.generateKeypair();
+    const startTimestamp = Math.floor(Date.now()/1000);
+    const eip712 = instance.createEIP712(publicKey,[CR_ADDR],startTimestamp,1);
+    const {EIP712Domain:_,...types} = eip712.types;
+    const sig = await signer.signTypedData(eip712.domain,types,eip712.message);
+    setBadge(4,'pending','decrypting…');
+    setStatus(4,'⏳ KMS decrypting privately…');
+    const result = await instance.userDecrypt(
+      [{handle:encClaimed,contractAddress:CR_ADDR}],
+      privateKey,publicKey,sig,[CR_ADDR],userAddr,startTimestamp,1
+    );
+    const claimed = result[encClaimed];
+    // Count-up animation
+    const target = Number(claimed);
+    const el = document.getElementById('reveal-value');
+    document.getElementById('reveal-box').style.display = 'block';
+    let current = 0;
+    const step = Math.max(1, Math.floor(target/60));
+    const anim = setInterval(()=>{
+      current = Math.min(current+step, target);
+      el.textContent = current.toLocaleString();
+      if (current >= target) clearInterval(anim);
+    }, 16);
+    setBadge(4,'done','done'); markDone(4);
+    setStatus(4,'✓ Decryption successful · Only you can see this value');
+    unlock(5);
+  } catch(e) { setBadge(4,'error','error'); document.getElementById('step4').classList.add('error-state'); setStatus(4,'❌ '+(e.shortMessage??e.message)); enableBtn(4); }
+};
+
+// ── Step 5: Observer
+window.grantObserver = async function() {
+  disableBtn(5); setBadge(5,'pending','confirm wallet…');
+  try {
+    const observer = document.getElementById('observer-addr').value.trim();
+    if (!observer) { setStatus(5,'❌ Enter an observer address.'); enableBtn(5); return; }
+    setStatus(5,'⏳ Awaiting wallet confirmation…');
+    const tx = await cr.grantObserver(assetId, observer);
+    setBadge(5,'pending','mining…');
+    const receipt = await tx.wait();
+    setBadge(5,'done','done'); markDone(5);
+    setStatus(5,
+      `✓ Observer granted · Gas: ${receipt.gasUsed.toLocaleString()} · ${txLink(tx.hash)}<br>`+
+      `<span style="color:var(--amber)">⚠ Permanent grant in v1. Only trust verified parties.</span>`);
+  } catch(e) { setBadge(5,'error','error'); document.getElementById('step5').classList.add('error-state'); setStatus(5,'❌ '+(e.shortMessage??e.message)); enableBtn(5); }
+};
+
+// ── Tab switching
+// ── Section nav
+window.scrollToSection = function(section) {
+  const map = { protocol:'section-protocol', dashboard:'section-dashboard' };
+  const el = document.getElementById(map[section]);
+  if (!el) return;
+  const offset = 110; // topbar + section nav height
+  const top = el.getBoundingClientRect().top + window.scrollY - offset;
+  window.scrollTo({ top, behavior:'smooth' });
+  if (section === 'dashboard' && signer) window.loadDashboard();
+};
+
+// Intersection observer to highlight active section
+(function() {
+  const sections = [
+    { id:'section-protocol',  nav:'snav-protocol' },
+    { id:'section-dashboard', nav:'snav-dashboard' },
+  ];
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        sections.forEach(s => {
+          document.getElementById(s.nav)?.classList.toggle('active', s.id === entry.target.id);
+        });
+        if (entry.target.id === 'section-dashboard' && signer) window.loadDashboard();
+      }
+    });
+  }, { rootMargin:'-40% 0px -55% 0px' });
+  sections.forEach(s => {
+    const el = document.getElementById(s.id);
+    if (el) obs.observe(el);
+  });
+})();
+
+// ── Dashboard loader
+window.loadDashboard = async function() {
+  if (!signer || !cr) return;
+  const userAddr = await signer.getAddress();
+  const dashAssets = document.getElementById('dash-assets');
+  dashAssets.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px">Loading…</div>';
+  try {
+    const assetIds = await cr.getStakedAssets(userAddr);
+    if (!assetIds.length) {
+      dashAssets.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:20px">No assets found. Register one in the Protocol tab.</div>';
+    } else {
+      dashAssets.innerHTML = '';
+      for (const id of assetIds) {
+        const state = Number(await cr.getAssetState(id));
+        const [holders] = await cr.getStakeholders(id);
+        const stateClass = state===2?'state-active':state===1?'state-pending':'state-invalid';
+        const stateName = STATES[state]??'UNKNOWN';
+        const card = document.createElement('div');
+        card.className = 'asset-card';
+        card.innerHTML = `
+          <div class="asset-card-header">
+            <span class="asset-id">${id.slice(0,18)}…</span>
+            <span class="state-badge ${stateClass}">${stateName}</span>
+          </div>
+          <div class="asset-meta">${holders.length} holder${holders.length>1?'s':''}</div>
+          ${state===2?`
+            <div class="dash-btn-row">
+              <button class="dash-btn gold" onclick="window.dashClaim('${id}')">Claim</button>
+              <button class="dash-btn teal" onclick="window.dashDecrypt('${id}')">Reveal Amount</button>
+            </div>
+            <button class="dash-btn muted" onclick="window.dashDeposit('${id}')" style="width:100%;margin-bottom:6px">
+              + Deposit Revenue (Distributor)
+            </button>
+          `:state===1?`
+            <button class="dash-btn warn" onclick="window.dashValidate('${id}')" style="width:100%">Validate Splits</button>
+          `:''}
+          <div class="dash-status" id="ds-${id.slice(2,10)}"></div>
+        `;
+        dashAssets.appendChild(card);
+      }
+    }
+  } catch(e) {
+    dashAssets.innerHTML = `<div style="color:var(--red);font-size:12px;padding:12px">Error loading assets: ${e.shortMessage??e.message}</div>`;
+  }
+
+  const dashObserved = document.getElementById('dash-observed');
+  dashObserved.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px">Scanning…</div>';
+  try {
+    const evs = await cr.queryFilter(cr.filters.ObserverGranted(null,null,userAddr), -50000);
+    if (!evs.length) {
+      dashObserved.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px">No observed assets.</div>';
+    } else {
+      dashObserved.innerHTML = '';
+      const seen = new Set();
+      for (const ev of evs) {
+        const id=ev.args[0], sh=ev.args[1];
+        if (seen.has(id+sh)) continue; seen.add(id+sh);
+        const card = document.createElement('div');
+        card.className = 'asset-card';
+        card.innerHTML = `
+          <div class="asset-id" style="margin-bottom:6px">${id.slice(0,18)}…</div>
+          <div class="asset-meta">Observing: ${sh.slice(0,12)}…</div>
+          <button class="dash-btn teal" onclick="window.dashObsDecrypt('${id}','${sh}')" style="width:100%">Decrypt Their Share</button>
+          <div class="dash-status" id="os-${id.slice(2,10)}"></div>
+        `;
+        dashObserved.appendChild(card);
+      }
+    }
+  } catch(e) {
+    const msg = e.message??'';
+    if (msg.includes('not a function')||msg.includes('filter')) {
+      dashObserved.innerHTML = '<div style="color:var(--text-muted);font-size:12px;text-align:center;padding:16px">No observed assets.</div>';
+    } else {
+      dashObserved.innerHTML = `<div style="color:var(--red);font-size:12px;padding:12px">Error: ${e.shortMessage??e.message}</div>`;
+    }
+  }
+};
+
+// ── Dashboard actions
+window.dashClaim = async function(id) {
+  const el = document.getElementById('ds-'+id.slice(2,10));
+  if(el) el.textContent = '⏳ Claiming…';
+  try {
+    const tx = await cr.claimShare(id);
+    if(el) el.textContent = '⏳ Mining…';
+    const r = await tx.wait();
+    if(el) el.innerHTML = `✓ Claimed · Gas: ${r.gasUsed.toLocaleString()} · ${txLink(tx.hash)}`;
+  } catch(e) {
+    const raw = (e.shortMessage??e.message??e.reason??'').toLowerCase();
+    let msg = e.shortMessage??e.message;
+    if(raw.includes('no revenue')) msg = 'No revenue deposited yet. Use "+ Deposit Revenue" below to fund this asset first.';
+    else if(raw.includes('already claimed')) msg = 'Already claimed for this asset.';
+    if(el) el.textContent = '❌ ' + msg;
+  }
+};
+
+window.dashDecrypt = async function(id) {
+  const el = document.getElementById('ds-'+id.slice(2,10));
+  if(el) el.textContent = '⏳ Sign in wallet…';
+  try {
+    const userAddr = await signer.getAddress();
+    const raw = await cr.getEncClaimed(id, userAddr);
+    if (BigInt(raw)===0n) { if(el) el.textContent='Claim first.'; return; }
+    const h = toHex32(raw);
+    const {publicKey,privateKey} = instance.generateKeypair();
+    const ts = Math.floor(Date.now()/1000);
+    const eip = instance.createEIP712(publicKey,[CR_ADDR],ts,1);
+    const {EIP712Domain:_,...types} = eip.types;
+    const sig = await signer.signTypedData(eip.domain,types,eip.message);
+    if(el) el.textContent = '⏳ Decrypting…';
+    const res = await instance.userDecrypt([{handle:h,contractAddress:CR_ADDR}],privateKey,publicKey,sig,[CR_ADDR],userAddr,ts,1);
+    if(el) el.innerHTML = `<span class="dash-reveal">${Number(res[h]).toLocaleString()}</span> <span style="color:var(--text-muted)">tokens</span>`;
+  } catch(e) { if(el) el.textContent='❌ '+(e.shortMessage??e.message); }
+};
+
+window.dashDeposit = async function(id) {
+  const el = document.getElementById('ds-'+id.slice(2,10));
+  const amount = prompt('Revenue amount to deposit (e.g. 1000000):');
+  if (!amount) return;
+  try {
+    const userAddr = await signer.getAddress(), amt = BigInt(amount);
+    if(el) el.textContent = '⏳ Minting tokens…';
+    await (await token.mintPlaintext(CR_ADDR, amt)).wait();
+    if(el) el.textContent = '⏳ Encrypting amount…';
+    const inp = instance.createEncryptedInput(CR_ADDR, userAddr);
+    inp.add128(amt); const enc = await inp.encrypt();
+    if(el) el.textContent = '⏳ Depositing…';
+    const tx = await cr.depositRevenue(id, enc.handles[0], enc.inputProof);
+    const r = await tx.wait();
+    if(el) el.innerHTML = `✓ Deposited ${Number(amount).toLocaleString()} · Gas: ${r.gasUsed.toLocaleString()} · ${txLink(tx.hash)}`;
+  } catch(e) { if(el) el.textContent='❌ '+(e.shortMessage??e.message); }
+};
+
+window.dashValidate = async function(id) {
+  const el = document.getElementById('ds-'+id.slice(2,10));
+  if(el) el.textContent = '⏳ Marking…';
+  try {
+    await (await cr.markSumDecryptable(id)).wait();
+    if(el) el.textContent = '⏳ KMS decrypting…';
+    const raw = await cr.getEncSum(id), h = toHex32(raw);
+    const res = await instance.publicDecrypt([h]);
+    const sum = res.clearValues[h];
+    if(el) el.textContent = '⏳ Confirming…';
+    await (await cr.confirmValidation(id, sum, res.decryptionProof)).wait();
+    if(el) el.innerHTML = `✓ Validated · Sum=${sum}`;
+    setTimeout(() => window.loadDashboard(), 1500);
+  } catch(e) { if(el) el.textContent='❌ '+(e.shortMessage??e.message); }
+};
+
+window.dashObsDecrypt = async function(id, sh) {
+  const el = document.getElementById('os-'+id.slice(2,10));
+  if(el) el.textContent = '⏳ Sign in wallet…';
+  try {
+    const userAddr = await signer.getAddress();
+    const raw = await cr.getEncShare(id, sh);
+    if (!raw||BigInt(raw)===0n) { if(el) el.textContent='No share found.'; return; }
+    const h = toHex32(raw);
+    const {publicKey,privateKey} = instance.generateKeypair();
+    const ts = Math.floor(Date.now()/1000);
+    const eip = instance.createEIP712(publicKey,[CR_ADDR],ts,1);
+    const {EIP712Domain:_,...types} = eip.types;
+    const sig = await signer.signTypedData(eip.domain,types,eip.message);
+    if(el) el.textContent = '⏳ Decrypting…';
+    const res = await instance.userDecrypt([{handle:h,contractAddress:CR_ADDR}],privateKey,publicKey,sig,[CR_ADDR],userAddr,ts,1);
+    if(el) el.innerHTML = `<span class="dash-reveal">${Number(res[h]).toLocaleString()}</span> <span style="color:var(--text-muted)">bps</span>`;
+  } catch(e) { if(el) el.textContent='❌ '+(e.shortMessage??e.message); }
+};
+
+// ── Init stakeholder rows
+window.updateStakeholderRows();
+</script>
+</body>
+</html>
