@@ -143,7 +143,60 @@ body{
 .snav-btn.active::after{transform:scaleX(1)}
 .snav-btn:hover{color:var(--text-dim)}
 
-/* ── Section label */
+/* ── Bottom nav (mobile only) */
+.bottom-nav{
+  display:none;
+  position:fixed;bottom:0;left:0;right:0;z-index:150;
+  background:rgba(15,13,11,0.97);
+  backdrop-filter:blur(16px);
+  border-top:1px solid var(--border2);
+  padding:0 0 env(safe-area-inset-bottom);
+}
+.bottom-nav-inner{
+  display:flex;
+  justify-content:space-around;
+  align-items:stretch;
+}
+.bnav-btn{
+  flex:1;
+  display:flex;flex-direction:column;
+  align-items:center;justify-content:center;
+  gap:5px;
+  padding:10px 8px 12px;
+  background:none;border:none;
+  cursor:pointer;
+  color:var(--text-muted);
+  font-family:'IBM Plex Mono',monospace;
+  font-size:9px;letter-spacing:1px;text-transform:uppercase;
+  text-decoration:none;
+  transition:color 0.15s;
+  position:relative;
+}
+.bnav-btn::before{
+  content:'';
+  position:absolute;top:0;left:20%;right:20%;
+  height:2px;
+  background:var(--gold);
+  transform:scaleX(0);
+  transition:transform 0.2s;
+  border-radius:0 0 2px 2px;
+}
+.bnav-btn.active{color:var(--gold)}
+.bnav-btn.active::before{transform:scaleX(1)}
+.bnav-btn:hover{color:var(--text-dim)}
+.bnav-icon{
+  font-size:20px;line-height:1;
+}
+
+@media(max-width:768px){
+  .bottom-nav{display:block}
+  .section-nav{display:none}
+  body{padding-bottom:68px}
+}
+@media(min-width:769px){
+  .bottom-nav{display:none}
+  .section-nav{display:block}
+}
 .section-label{
   font-size:9px;letter-spacing:2px;text-transform:uppercase;
   color:var(--text-muted);
@@ -1193,23 +1246,29 @@ window.scrollToSection = function(section) {
   const map = { protocol:'section-protocol', dashboard:'section-dashboard' };
   const el = document.getElementById(map[section]);
   if (!el) return;
-  const offset = 110; // topbar + section nav height
+  const offset = 110;
   const top = el.getBoundingClientRect().top + window.scrollY - offset;
   window.scrollTo({ top, behavior:'smooth' });
   if (section === 'dashboard' && signer) window.loadDashboard();
+  // sync both navs
+  ['protocol','dashboard'].forEach(s => {
+    document.getElementById('bnav-'+s)?.classList.toggle('active', s === section);
+    document.getElementById('snav-'+s)?.classList.toggle('active', s === section);
+  });
 };
 
 // Intersection observer to highlight active section
 (function() {
   const sections = [
-    { id:'section-protocol',  nav:'snav-protocol' },
-    { id:'section-dashboard', nav:'snav-dashboard' },
+    { id:'section-protocol',  nav:'snav-protocol',  bnav:'bnav-protocol' },
+    { id:'section-dashboard', nav:'snav-dashboard',  bnav:'bnav-dashboard' },
   ];
   const obs = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         sections.forEach(s => {
           document.getElementById(s.nav)?.classList.toggle('active', s.id === entry.target.id);
+          document.getElementById(s.bnav)?.classList.toggle('active', s.id === entry.target.id);
         });
         if (entry.target.id === 'section-dashboard' && signer) window.loadDashboard();
       }
@@ -1392,5 +1451,23 @@ window.dashObsDecrypt = async function(id, sh) {
 // ── Init stakeholder rows
 window.updateStakeholderRows();
 </script>
+<!-- Bottom nav (mobile) -->
+<nav class="bottom-nav" id="bottom-nav">
+  <div class="bottom-nav-inner">
+    <a class="bnav-btn" href="index.html" id="bnav-home">
+      <span class="bnav-icon">←</span>
+      <span>Home</span>
+    </a>
+    <button class="bnav-btn active" id="bnav-protocol" onclick="window.scrollToSection('protocol')">
+      <span class="bnav-icon">⬡</span>
+      <span>Protocol</span>
+    </button>
+    <button class="bnav-btn" id="bnav-dashboard" onclick="window.scrollToSection('dashboard')">
+      <span class="bnav-icon">⊞</span>
+      <span>Dashboard</span>
+    </button>
+  </div>
+</nav>
+
 </body>
 </html>
